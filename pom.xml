@@ -1,0 +1,167 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>edu.umass.cs.iesl</groupId>
+	<artifactId>multilingual-universal-schema</artifactId>
+	<version>0.0-SNAPSHOT</version>
+	<inceptionYear>2015</inceptionYear>
+
+	<properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <scala.majorVersion>2.11</scala.majorVersion>
+        <scala.minorVersion>.1</scala.minorVersion>
+        <scalatest.version>2.2.2</scalatest.version>
+        <junit.version>4.10</junit.version>
+        <factorie.version>1.2-SNAPSHOT</factorie.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>scala-tools.org</id>
+			<name>Scala-Tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</repository>
+		<repository>
+			<id>iesl.cs.umass.edu</id>
+			<name>IESL repository</name>
+			<url>https://dev-iesl.cs.umass.edu/nexus/content/repositories/thirdparty/</url>
+		</repository>
+		<repository>
+			<id>iesl.cs.umass.edu2</id>
+			<name>IESL repository</name>
+			<url>https://dev-iesl.cs.umass.edu/nexus/content/repositories/public/</url>
+		</repository>
+		<repository>
+			<id>iesl.cs.umass.edu3</id>
+			<name>IESL repository</name>
+			<url>https://dev-iesl.cs.umass.edu/nexus/content/repositories/public-snapshots/</url>
+		</repository>
+        <repository>
+            <id>maven2-lucene</id>
+            <name>Maven2 Lucene Repository</name>
+            <url>http://repo1.maven.org/maven2/org/apache/lucene/</url>
+        </repository>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <name>Sonatype Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    
+    </repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>scala-tools.org</id>
+			<name>Scala-Tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<dependencies>
+
+        <dependency>
+            <groupId>edu.umass.cs.iesl.entity_embeddings</groupId>
+            <artifactId>entity_embeddings</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.majorVersion}${scala.minorVersion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cc.factorie</groupId>
+            <artifactId>factorie_${scala.majorVersion}</artifactId>
+            <version>${factorie.version}</version>
+        </dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+		</dependency>
+
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.majorVersion}</artifactId>
+            <version>${scalatest.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cc.factorie.app.nlp</groupId>
+            <artifactId>all-models</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.scala-tools</groupId>
+				<artifactId>maven-scala-plugin</artifactId>
+                <version>2.15.2</version>
+				<configuration>
+					<launchers>
+					</launchers>
+					<scalaVersion>${scala.majorVersion}${scala.minorVersion}</scalaVersion>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
+                    <!--&lt;!&ndash; Assembles the jar and other release formats (tarball, etc.). &ndash;&gt;-->
+                    <!--<plugin>-->
+                      <!--<artifactId>maven-assembly-plugin</artifactId>-->
+                      <!--<version>2.4</version>-->
+                      <!--<executions>-->
+                        <!--<execution>-->
+                          <!--<id>make-assembly</id>-->
+                          <!--<phase>package</phase>-->
+                          <!--<goals>-->
+                            <!--<goal>attached</goal>-->
+                          <!--</goals>-->
+                        <!--</execution>-->
+                      <!--</executions>-->
+                      <!--<configuration>-->
+                        <!--<tarLongFileMode>gnu</tarLongFileMode>-->
+                        <!--<descriptorRefs>-->
+                          <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
+                        <!--</descriptorRefs>-->
+                      <!--</configuration>-->
+                    <!--</plugin>-->
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
