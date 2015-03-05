@@ -12,9 +12,9 @@ package edu.umass.cs.iesl
   import edu.umass.cs.iesl.entity_embeddings.util.FileIO
   import edu.umass.cs.iesl.entity_embeddings.{EntityEmbeddingOpts, eval}
 
-  object EmbeddingEntiyLinking {
+  object EmbeddingEntiyLinking extends App {
 
-    def main(args: Array[String]) = {
+//    def main(args: Array[String]) = {
 
       val opts = new EntityEmbeddingOpts()
       opts.parse(args)
@@ -35,11 +35,9 @@ package edu.umass.cs.iesl
       // Load the embeddings
       val embeddingCollection = EmbeddingCollection.fromCMDOptions(opts)
 
-      // Document text
-      val exampleDocumentText = "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
-
+    def linkText(inputStr : String, docId : String = "ExampleDocument", lang : Object = English) = {
       // Document Representation for Entity linking
-      val elDoc = ELDocument("ExampleDocument", exampleDocumentText,lang=English)
+      val elDoc = ELDocument(docId, inputStr,lang=English)
 
       // Convert to a factorie document
       val fDoc = elDoc.toFactorieDocument
@@ -67,6 +65,8 @@ package edu.umass.cs.iesl
       for (mention <- fDoc.attr[EntityLinks].mentions) {
         println(mention.mentionSlug + " linked to " + mention.entitySlug + " URL: " + Slug.toWikiURL(mention.entitySlug))
       }
+
+      fDoc
     }
   }
 
