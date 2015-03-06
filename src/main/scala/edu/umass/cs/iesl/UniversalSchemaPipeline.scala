@@ -1,9 +1,6 @@
 package edu.umass.cs.iesl
 
 import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
-import edu.umass.cs.iesl.tackbp2014.nlp.ChainedNLPComponent
-import edu.umass.cs.iesl.tackbp2014.nlp.DeterministicSubstringNerCorefComponent
-import edu.umass.cs.iesl.tackbp2014.nlp.SlotFillingLogPatternRelationMentionFindingComponent
 
 /**
  * Created by pv on 3/5/15.
