@@ -12,12 +12,7 @@ package edu.umass.cs.iesl
   import edu.umass.cs.iesl.entity_embeddings.util.FileIO
   import edu.umass.cs.iesl.entity_embeddings.{EntityEmbeddingOpts, eval}
 
-  object EmbeddingEntiyLinking extends App {
-
-//    def main(args: Array[String]) = {
-
-      val opts = new EntityEmbeddingOpts()
-      opts.parse(args)
+  class EmbeddingEntiyLinking(opts : EntityEmbeddingOpts){
 
       // Read in the language
       val lang = DocLanguage.fromIsoString(opts.language.value)

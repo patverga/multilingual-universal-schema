@@ -1,5 +1,6 @@
 package edu.umass.cs.iesl
 
+import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
 import edu.umass.cs.iesl.tackbp2014.nlp.ChainedNLPComponent
 import edu.umass.cs.iesl.tackbp2014.nlp.DeterministicSubstringNerCorefComponent
 import edu.umass.cs.iesl.tackbp2014.nlp.SlotFillingLogPatternRelationMentionFindingComponent
@@ -18,9 +19,12 @@ object RelationComponents extends ChainedNLPComponent {
 
 object UniversalSchemaPipeline extends App
 {
+  val opts = new EntityEmbeddingOpts
+  opts.parse(args)
   // Document text
   val exampleDocumentText = "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
-  val exampleDoc = EmbeddingEntiyLinking.linkText(exampleDocumentText)
+  val entityLinker = new EmbeddingEntiyLinking(opts)
+  val exampleDoc = entityLinker.linkText(exampleDocumentText)
   RelationComponents.process1(exampleDoc)
   println("didnt crash")
 }
