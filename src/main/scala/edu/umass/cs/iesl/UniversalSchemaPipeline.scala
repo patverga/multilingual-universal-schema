@@ -1,6 +1,7 @@
 package edu.umass.cs.iesl
 
 import cc.factorie.app.nlp.Document
+import cc.factorie.app.nlp.ner.ConllChainNer
 import cc.factorie.app.nlp.pos.OntonotesForwardPosTagger
 import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
 
@@ -33,6 +34,7 @@ object TestRelationComponents extends App{
   val exampleDocumentText = "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
   val exampleDoc = new Document(exampleDocumentText)
   OntonotesForwardPosTagger.process(exampleDoc)
+  ConllChainNer.process(exampleDoc)
   RelationComponents.process1(exampleDoc)
   println("didnt crash")
 }
