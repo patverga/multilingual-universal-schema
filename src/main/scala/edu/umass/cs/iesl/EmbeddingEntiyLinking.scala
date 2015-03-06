@@ -35,13 +35,6 @@ package edu.umass.cs.iesl
       // Load the embeddings
       val embeddingCollection = EmbeddingCollection.fromCMDOptions(opts)
 
-    def linkText(inputStr : String, docId : String = "ExampleDocument", lang : Object = English) = {
-      // Document Representation for Entity linking
-      val elDoc = ELDocument(docId, inputStr,lang=English)
-
-      // Convert to a factorie document
-      val fDoc = elDoc.toFactorieDocument
-
       // Define the mention finder
       val mentionFinder = new NERBasedMentionFinder(surfaceFormDB,English,caseSensitiveMentions = false) // Using case insensitive mentions
 
@@ -51,6 +44,13 @@ package edu.umass.cs.iesl
       val contextWindowSize = (opts.window.value, 10000, 10000)
       val entityLinker = new LogisticRegressionTrainedLinker(features, embeddingCollection, surfaceFormDB, typeDB, null, contextWindowSize, opts.caseSensitiveWords.value, opts.caseSensitiveMentions.value, weights = weights)
 
+
+    def linkText(inputStr : String, docId : String = "ExampleDocument", lang : Object = English) = {
+      // Document Representation for Entity linking
+      val elDoc = ELDocument(docId, inputStr,lang=English)
+
+      // Convert to a factorie document
+      val fDoc = elDoc.toFactorieDocument
 
       println("Running Mention finding")
       // Run the mention finder
