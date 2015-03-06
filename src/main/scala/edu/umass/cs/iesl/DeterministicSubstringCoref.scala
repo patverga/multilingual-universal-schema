@@ -42,7 +42,7 @@ class DeterministicSubstringCoref(  phraseFinder:MentionPhraseFinder) extends Do
 //    val phrases = phraseFinder(document)
     val unsluggedDoc = document.attr[UnsluggedDocument].doc
     val phrases = unsluggedDoc.attr[Seq[Phrase]]
-    val coref = new WithinDocCoref(document)
+    val coref = new WithinDocCoref(unsluggedDoc)
     val phrasesSortedDecreasingByLength = phrases.toList.sortBy(_.tokensString(" ").length * -1)
 
     println("phrases: " + phrases.size + "\t\t phrasesSorted :" + phrasesSortedDecreasingByLength.length)
