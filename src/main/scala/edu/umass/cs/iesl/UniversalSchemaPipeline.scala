@@ -44,7 +44,7 @@ object TestRelationComponents extends App{
   EnglishNERMentionFinder.process(fDoc)
   RelationComponents.process1(fDoc)
 //  println("didnt crash")
-  formatDoc(fDoc)
+  println(formatDoc(fDoc))
 
   def formatDoc(doc: Document): String = {
     val sb = new StringBuilder
@@ -66,6 +66,6 @@ object TestRelationComponents extends App{
         sb.append("\n")
       })
     })
-    println(sb.toString)
+    sb.toString()
   }
 }
