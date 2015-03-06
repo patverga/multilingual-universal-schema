@@ -14,6 +14,7 @@ package edu.umass.cs.iesl
 
 import cc.factorie.app.nlp._
 import cc.factorie.app.nlp.coref.{WithinDocCoref, MentionPhraseFinder, ConllProperNounPhraseFinder}
+import cc.factorie.app.nlp.phrase.Phrase
 import cc.factorie.app.nlp.pos.PennPosTag
 
 /** A dead-simple deterministic coreference system that operates only on named entities
@@ -37,7 +38,8 @@ class DeterministicSubstringCoref(  phraseFinder:MentionPhraseFinder) extends Do
     }
   }
   def process(document: Document) = {
-    val phrases = phraseFinder(document)
+//    val phrases = phraseFinder(document)
+    val phrases = document.attr[Seq[Phrase]]
     val coref = new WithinDocCoref(document)
     val phrasesSortedDecreasingByLength = phrases.toList.sortBy(_.tokensString(" ").length * -1)
 

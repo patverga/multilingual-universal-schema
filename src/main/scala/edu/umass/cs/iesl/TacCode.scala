@@ -48,10 +48,11 @@ object SlotFillingLogPatternRelationMentionFindingComponent extends NLPComponent
 }
 
 object TacDeterministicSubstringCoref extends DeterministicSubstringCoref(ConllProperNounPhraseFinder)//TacNERPhraseFinder)
-object SlotFillingLogPatternsRelationMentions extends LogPatternsRelationMentions(EntityTypePatterns.SLOTFILLING)
+object SlotFillingLogPatternsRelationMentions extends LogPatternsRelationMentions(EntityTypePatterns.TEST)
 
 object EntityTypePatterns {
   val SLOTFILLING = "(ORG|PER|ORGANIZATION|PERSON)"
+  val TEST = "(ORG|PER|LOC|ORGANIZATION|PERSON|LOCATION)"
   val COLDSTART = "(ORG|PER|GPE|ORGANIZATION|PERSON|GPE:COUNTRY|GPE:STATE_PROVINCE|GPE:CITY)"
   val EVENT ="(LOC|WEA|SENTENCE|GPE|NUMERIC|CRIME|CONTACT_INFO|PER|ORG|DATE|FAC|JOB_TITLE|VEH)"
 }

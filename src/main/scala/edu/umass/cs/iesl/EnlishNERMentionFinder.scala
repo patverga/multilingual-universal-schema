@@ -52,6 +52,8 @@ class EnlishNERMentionFinder(surfaceFormDB:SurfaceFormDB, lang: DocLanguage,case
 //    OntonotesTransitionBasedParser.process(unsluggedDoc)
 //    ParseAndNerBasedPhraseFinder.process(unsluggedDoc)
     val mentions = ConllProperNounPhraseFinder.apply(unsluggedDoc)
+    document.attr += mentions
+
     val links = document.attr[EntityLinks]
     for (mention <- mentions) {
       // Note that mention will be unslugged so we need to slug it.
