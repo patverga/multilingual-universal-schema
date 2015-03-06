@@ -6,7 +6,6 @@ import cc.factorie.app.nlp.pos.OntonotesForwardPosTagger
 import cc.factorie.app.nlp.relation.RelationMentionList
 import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
 import edu.umass.cs.iesl.entity_embeddings.data_structures.{ELDocument, English}
-import edu.umass.cs.iesl.tackbp2014.freebase.IdForm
 
 /**
  * Created by pv on 3/5/15.
