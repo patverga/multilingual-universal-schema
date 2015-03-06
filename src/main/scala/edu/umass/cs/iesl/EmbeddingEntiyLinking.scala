@@ -20,9 +20,6 @@ package edu.umass.cs.iesl
       // Load the Redirect/Entity Resolution DB
       val entityResolver = EntityResolver.fromCMDOptions(opts, lang)
 
-      // Load the surface form database
-      val surfaceFormDB = SurfaceFormDB.fromCMDOptions(opts)
-
       // Load the typeDB
       val typeDB = TypeDB.fromCMDOptions(opts)
 
@@ -31,13 +28,18 @@ package edu.umass.cs.iesl
       val embeddingCollection = EmbeddingCollection.fromCMDOptions(opts)
 
       // Define the mention finder
-      val mentionFinder = new EnlishNERMentionFinder(surfaceFormDB,English,caseSensitiveMentions = false) // Using case insensitive mentions
+      val mentionFinder = new EnglishNERMentionFinder(English, caseSensitiveMentions = false) // Using case insensitive mentions
 
       // Define the entity linker
       val features = opts.features.value.map(FeatureType.fromIsoString).toList
       val weights = new DenseTensor1(FileIO.readFeatureWeights(opts.featureWeightsFilename.value.head))
       val contextWindowSize = (opts.window.value, 10000, 10000)
-      val entityLinker = new LogisticRegressionTrainedLinker(features, embeddingCollection, surfaceFormDB, typeDB, null, contextWindowSize, opts.caseSensitiveWords.value, opts.caseSensitiveMentions.value, weights = weights)
+
+
+    // Load the surface form database
+      val surfaceFormDB = SurfaceFormDB.fromCMDOptions(opts)
+      val entityLinker = new LogisticRegressionTrainedLinker(features, embeddingCollection, surfaceFormDB,
+        typeDB, null, contextWindowSize, opts.caseSensitiveWords.value, opts.caseSensitiveMentions.value, weights = weights)
 
 
     def linkText(inputStr : String, docId : String = "ExampleDocument", lang : Object = English) = {

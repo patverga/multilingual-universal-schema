@@ -12,7 +12,11 @@ import edu.umass.cs.iesl.entity_embeddings.data_structures._
 import edu.umass.cs.iesl.entity_embeddings.data_structures.data_stores.SurfaceFormDB
 import edu.umass.cs.iesl.entity_embeddings.linking.MentionFinder
 
-class EnlishNERMentionFinder(surfaceFormDB:SurfaceFormDB, lang: DocLanguage,caseSensitiveMentions:Boolean) extends MentionFinder {
+
+object EnglishNERMentionFinder extends EnglishNERMentionFinder(English, false) {}
+
+//class EnlishNERMentionFinder(surfaceFormDB:SurfaceFormDB, lang: DocLanguage,caseSensitiveMentions:Boolean) extends MentionFinder {
+class EnglishNERMentionFinder(lang: DocLanguage,caseSensitiveMentions:Boolean) extends MentionFinder {
 
   def prereqAttrs: Seq[Class[_]] = Seq(classOf[Token], classOf[DocLanguage])
 

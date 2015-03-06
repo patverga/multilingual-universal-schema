@@ -4,6 +4,7 @@ import cc.factorie.app.nlp.Document
 import cc.factorie.app.nlp.ner.ConllChainNer
 import cc.factorie.app.nlp.pos.OntonotesForwardPosTagger
 import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
+import edu.umass.cs.iesl.entity_embeddings.data_structures.English
 
 /**
  * Created by pv on 3/5/15.
@@ -33,8 +34,10 @@ object TestRelationComponents extends App{
   // Document text
   val exampleDocumentText = "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
   val exampleDoc = new Document(exampleDocumentText)
+  // Define the mention finder
   OntonotesForwardPosTagger.process(exampleDoc)
   ConllChainNer.process(exampleDoc)
+  EnglishNERMentionFinder.process(exampleDoc)
   RelationComponents.process1(exampleDoc)
   println("didnt crash")
 }
