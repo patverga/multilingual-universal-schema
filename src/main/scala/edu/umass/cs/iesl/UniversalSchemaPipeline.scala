@@ -38,8 +38,8 @@ object TestRelationComponents extends App{
   // Convert to a factorie document
   val fDoc = elDoc.toFactorieDocument
   // Define the mention finder
-  OntonotesForwardPosTagger.process(fDoc)
-  ConllChainNer.process(fDoc)
+//  OntonotesForwardPosTagger.process(fDoc)
+//  ConllChainNer.process(fDoc)
   EnglishNERMentionFinder.process(fDoc)
   RelationComponents.process1(fDoc)
   println("didnt crash")
