@@ -56,7 +56,7 @@ class EnglishNERMentionFinder(lang: DocLanguage,caseSensitiveMentions:Boolean) e
 //    OntonotesTransitionBasedParser.process(unsluggedDoc)
 //    ParseAndNerBasedPhraseFinder.process(unsluggedDoc)
     val mentions = ConllProperNounPhraseFinder.apply(unsluggedDoc)
-    document.attr += mentions
+    unsluggedDoc.attr += mentions
 
     val links = document.attr[EntityLinks]
     for (mention <- mentions) {

@@ -16,6 +16,7 @@ import cc.factorie.app.nlp._
 import cc.factorie.app.nlp.coref.{WithinDocCoref, MentionPhraseFinder, ConllProperNounPhraseFinder}
 import cc.factorie.app.nlp.phrase.Phrase
 import cc.factorie.app.nlp.pos.PennPosTag
+import edu.umass.cs.iesl.entity_embeddings.data_structures.UnsluggedDocument
 
 /** A dead-simple deterministic coreference system that operates only on named entities
     and resolves coreference only by exact string suffix match. That is, the canonical mention
@@ -39,7 +40,8 @@ class DeterministicSubstringCoref(  phraseFinder:MentionPhraseFinder) extends Do
   }
   def process(document: Document) = {
 //    val phrases = phraseFinder(document)
-    val phrases = document.attr[Seq[Phrase]]
+    val unsluggedDoc = document.attr[UnsluggedDocument].doc
+    val phrases = unsluggedDoc.attr[Seq[Phrase]]
     val coref = new WithinDocCoref(document)
     val phrasesSortedDecreasingByLength = phrases.toList.sortBy(_.tokensString(" ").length * -1)
 
