@@ -15,8 +15,6 @@ package edu.umass.cs.iesl
 import cc.factorie.app.nlp._
 import cc.factorie.app.nlp.coref.{WithinDocCoref, MentionPhraseFinder, ConllProperNounPhraseFinder}
 import cc.factorie.app.nlp.pos.PennPosTag
-import cc.factorie.app.nlp.ner.NerTag
-import cc.factorie.app.nlp.phrase.Phrase
 
 /** A dead-simple deterministic coreference system that operates only on named entities
     and resolves coreference only by exact string suffix match. That is, the canonical mention

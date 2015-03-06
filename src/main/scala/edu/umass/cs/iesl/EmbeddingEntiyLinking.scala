@@ -8,7 +8,7 @@ package edu.umass.cs.iesl
   import edu.umass.cs.iesl.entity_embeddings.data_structures.data_stores.{EmbeddingCollection, SurfaceFormDB, TypeDB}
   import edu.umass.cs.iesl.entity_embeddings.embedding.EntityResolver
   import edu.umass.cs.iesl.entity_embeddings.eval.EvalOutput
-  import edu.umass.cs.iesl.entity_embeddings.linking.{LogisticRegressionTrainedLinker, NERBasedMentionFinder}
+  import edu.umass.cs.iesl.entity_embeddings.linking.{LogisticRegressionTrainedLinker, EnlishNERMentionFinder}
   import edu.umass.cs.iesl.entity_embeddings.util.FileIO
   import edu.umass.cs.iesl.entity_embeddings.{EntityEmbeddingOpts, eval}
 
@@ -31,7 +31,7 @@ package edu.umass.cs.iesl
       val embeddingCollection = EmbeddingCollection.fromCMDOptions(opts)
 
       // Define the mention finder
-      val mentionFinder = new NERBasedMentionFinder(surfaceFormDB,English,caseSensitiveMentions = false) // Using case insensitive mentions
+      val mentionFinder = new EnlishNERMentionFinder(surfaceFormDB,English,caseSensitiveMentions = false) // Using case insensitive mentions
 
       // Define the entity linker
       val features = opts.features.value.map(FeatureType.fromIsoString).toList
