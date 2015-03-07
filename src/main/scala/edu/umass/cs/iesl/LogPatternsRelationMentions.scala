@@ -22,7 +22,7 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
 
     val relationMentions = new RelationMentionList2
     val elMentions = document.attr[EntityLinks]
-    val mentions = elMentions.mentions.toSeq.sortBy(_.span).toList
+    val mentions = elMentions.mentions.toSeq.toList
 
     /** this produces a sliding window of 4 mentions that we then compare to generate contexts. Each mention should be compared
       * to the three mentions before and after it in the following loop. The last element is a singleton list which we drop.
