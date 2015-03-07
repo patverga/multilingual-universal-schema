@@ -3,6 +3,7 @@ package edu.umass.cs.iesl
 import cc.factorie.app.nlp.{Token, Document, DocumentAnnotator}
 import cc.factorie.app.nlp.coref.{ConllProperNounPhraseFinder}
 
+
 /**
  * Created by pv on 3/6/15.
  */
