@@ -44,6 +44,9 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
 //         if e1.sentence == e2.sentence) {
           e1 = m1.span;
           e2 = m2.span;
+          println(e1.head.string);
+            println(e1.head.nerTag);
+          println(e1.head.nerTag.baseCategoryValue);
           e1Type = e1.head.nerTag.baseCategoryValue;
           e2Type = e2.head.nerTag.baseCategoryValue;
           e1Start = e1.tokens(0).positionInSentence;
