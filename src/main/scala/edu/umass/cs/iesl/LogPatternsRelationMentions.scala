@@ -7,7 +7,7 @@ import cc.factorie.app.nlp.relation.{RelationMention, TACRelationList, TACRelati
 import cc.factorie.app.nlp._
 import cc.factorie.util.Attr
 import cc.factorie.variable.ArrowVariable
-import edu.umass.cs.iesl.entity_embeddings.data_structures.{EntityRef, EntityLinks}
+import edu.umass.cs.iesl.entity_embeddings.data_structures.{UnsluggedDocument, EntityRef, EntityLinks}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -23,7 +23,7 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
     val elMentions = document.attr[EntityLinks]
     val relationMentions = new RelationMentionList2
     val mentions = elMentions.mentions.toSeq.toList
-
+    val unsluggedDoc = document.attr[UnsluggedDocument].doc
     /** this produces a sliding window of 4 mentions that we then compare to generate contexts. Each mention should be compared
       * to the three mentions before and after it in the following loop. The last element is a singleton list which we drop.
       * The last mention in the document has already been compared to the three mentions that preceed it.
@@ -53,7 +53,8 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
 //          e2End = e2.tokens.last.positionInSentence + 1;
 //          toks = e1.sentence.tokens.map(_.string).toArray;
           if e1.sentence == e2.sentence) {
-      println(e1.head.string)
+
+      println(e1.head.string, unsluggedDoc.tokens(e1.head.position))
       println(e1.head.nerTag)
       println(e1.head.nerTag.baseCategoryValue)
 
