@@ -48,15 +48,19 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
           e2Unslugged = unsluggedDoc.asSection(e2.head.positionInSection);
           e1Type = e1Unslugged.nerTag.baseCategoryValue;
           e2Type = e2Unslugged.nerTag.baseCategoryValue;
-          e1Start = e1.tokens(0).positionInSentence;
-          e1End = e1.tokens.last.positionInSentence + 1;
-          e2Start = e2.tokens(0).positionInSentence;
-          e2End = e2.tokens.last.positionInSentence + 1
+//          e1Start = e1.tokens(0).positionInSentence;
+//          e1End = e1.tokens.last.positionInSentence + 1;
+//          e2Start = e2.tokens(0).positionInSentence;
+//          e2End = e2.tokens.last.positionInSentence + 1
+         e1Start = e1Unslugged.positionInSentence;
+         e1End = e1Start + e1.length;
+         e2Start = e2Unslugged.positionInSentence;
+         e2End = e2Start + e2.length
 //          toks = e1.sentence.tokens.map(_.string).toArray;
 //          if e1.sentence == e2.sentence) {
     ){
            println(e1Type, e2Type, e1Start, e1End, e2Start, e2End)
-           println(e1Unslugged.sentence.tokens.map(_.string).toArray)
+           println(e1Unslugged.sentence.tokens.map(_.string).toArray.mkString(" "))
            println(e1.sentence.string)
 //      // Entity1 is person or organization: add arg1 arg2 pattern
 //      if (perOrgPattern.matcher(e1Type).matches) {
