@@ -55,32 +55,31 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
          e1Start = e1Unslugged.positionInSentence;
          e1End = e1Start + e1.length;
          e2Start = e2Unslugged.positionInSentence;
-         e2End = e2Start + e2.length
-//          toks = e1.sentence.tokens.map(_.string).toArray;
-//          if e1.sentence == e2.sentence) {
-    ){
-           println(e1Type, e2Type, e1Start, e1End, e2Start, e2End)
-           println(e1Unslugged.sentence.tokens.map(_.string).toArray.mkString(" "))
-           println(e1.sentence.string)
-//      // Entity1 is person or organization: add arg1 arg2 pattern
-//      if (perOrgPattern.matcher(e1Type).matches) {
-//        val pat = patternLog(toks, e1Start, e1End, e2Start, e2End)
-//        //relationMentions += new RelationMention(m1, m2, "surface", pat)
-//        val m = new RelationMention2(m1, m2, true)
-//        m._relations += new TACRelation(pat, 1.0, pat)
-//        relationMentions += m
-//
-//      }
-//      // Entity2 is person or organization: add arg2 arg1 pattern
-//      if (perOrgPattern.matcher(e2Type).matches) {
-//        val pat = patternLog(toks, e2Start, e2End, e1Start, e1End)
-//        //relationMentions += new RelationMention(m2, m1, "surface", pat)
-//
-//        // TODO: check effect of order with new relationmentions
-//        val m = new RelationMention2(m1, m2, false) //, "surface", pat)
-//        m._relations += new TACRelation(pat, 1.0, pat)
-//        relationMentions += m
-//      }
+         e2End = e2Start + e2.length;
+          toks = e1Unslugged.sentence.tokens.map(_.string).toArray;
+          if e1Unslugged.sentence == e2Unslugged.sentence) {
+//           println(e1Type, e2Type, e1Start, e1End, e2Start, e2End)
+//           println(e1Unslugged.sentence.tokens.map(_.string).toArray.mkString(" "))
+//           println(e1.sentence.string)
+      // Entity1 is person or organization: add arg1 arg2 pattern
+      if (perOrgPattern.matcher(e1Type).matches) {
+        val pat = patternLog(toks, e1Start, e1End, e2Start, e2End)
+        //relationMentions += new RelationMention(m1, m2, "surface", pat)
+        val m = new RelationMention2(m1, m2, true)
+        m._relations += new TACRelation(pat, 1.0, pat)
+        relationMentions += m
+
+      }
+      // Entity2 is person or organization: add arg2 arg1 pattern
+      if (perOrgPattern.matcher(e2Type).matches) {
+        val pat = patternLog(toks, e2Start, e2End, e1Start, e1End)
+        //relationMentions += new RelationMention(m2, m1, "surface", pat)
+
+        // TODO: check effect of order with new relationmentions
+        val m = new RelationMention2(m1, m2, false) //, "surface", pat)
+        m._relations += new TACRelation(pat, 1.0, pat)
+        relationMentions += m
+      }
       //      // TODO test this
       //      else{
       //        val pat = CandidatesToPatternMatrix.patternLog(toks, e1Start, e1End, e2Start, e2End)
