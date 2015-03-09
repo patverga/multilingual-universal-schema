@@ -54,7 +54,7 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
 //          toks = e1.sentence.tokens.map(_.string).toArray;
           if e1.sentence == e2.sentence) {
 
-      println(e1.head.string, unsluggedDoc.tokens(e1.head.position))
+      println(e1.head.string + "\t" + unsluggedDoc.asSection(e1.head.positionInSection))
       println(e1.head.nerTag)
       println(e1.head.nerTag.baseCategoryValue)
 
