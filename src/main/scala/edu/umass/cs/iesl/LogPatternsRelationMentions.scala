@@ -53,8 +53,8 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
           e1End = e1.tokens.last.positionInSentence + 1;
           e2Start = e2.tokens(0).positionInSentence;
           e2End = e2.tokens.last.positionInSentence + 1;
-//          toks = e1.sentence.tokens.map(_.string).toArray;
-          if e1.sentence == e2.sentence) {
+          toks = e1.tokens(0).sentence.tokens.map(_.string).toArray;
+          if e1.tokens(0).sentence == e2.tokens(0).sentence) {
 
       // Entity1 is person or organization: add arg1 arg2 pattern
       if (perOrgPattern.matcher(e1Type).matches) {
