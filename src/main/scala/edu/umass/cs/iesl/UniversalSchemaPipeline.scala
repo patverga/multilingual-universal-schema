@@ -57,8 +57,8 @@ object UniversalSchemaPipeline extends App
     val relationMentionList = doc.attr[RelationMentionList2]
     relationMentionList.foreach(rm => {
       rm._relations.foreach(r => {
-        sb.append(s"${alignMentionEntityLink(rm.arg1, doc)}\t${rm.arg1.span.head.nerTag.baseCategoryValue}\t") // id1 nertag
-        sb.append(s"${alignMentionEntityLink(rm.arg2, doc)}\t${rm.arg2.span.head.nerTag.baseCategoryValue}\t") // id2 nertag
+        sb.append(s"${rm.arg1.entitySlug}\t)//${rm.arg1.span.head.nerTag.baseCategoryValue}\t") // id1 nertag
+        sb.append(s"${rm.arg2.entitySlug}\t$)//{rm.arg2.span.head.nerTag.baseCategoryValue}\t") // id2 nertag
         sb.append(s"${rm.arg1.span.string}\t${rm.arg2.span.string}\t") // string1 string2
         sb.append(s"${doc.name}\t") // docid
         sb.append(s"${rm.arg1.span.head.stringStart}-${rm.arg1.span.last.stringEnd}:") // first mention offsets
@@ -70,18 +70,7 @@ object UniversalSchemaPipeline extends App
     })
     sb.toString()
   }
-  
-  def alignMentionEntityLink(relationMention : EntityRef, doc : Document): String = {
-    if (doc.attr[EntityLinks].mentions != null) {
-      val rmHead = relationMention.span.head
-      for (mention <- fDoc.attr[EntityLinks].mentions) {
-        if (rmHead == mention.span.head)
-          return mention.entitySlug
-        //        println(mention.mentionSlug + " linked to " + mention.entitySlug + " URL: " + Slug.toWikiURL(mention.entitySlug))
-      }
-    }
-    relationMention.entitySlug
-  }
+
 }
 
 object RelationComponents extends ChainedNLPComponent {
