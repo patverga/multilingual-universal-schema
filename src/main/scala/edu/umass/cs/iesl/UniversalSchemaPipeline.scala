@@ -1,5 +1,7 @@
 package edu.umass.cs.iesl
 
+import java.io.PrintWriter
+
 import cc.factorie.app.nlp.Document
 import cc.factorie.la.DenseTensor1
 import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
@@ -15,25 +17,37 @@ import edu.umass.cs.iesl.entity_embeddings.util.FileIO
 
 object UniversalSchemaPipeline extends App
 {
-  // Document text
-  val exampleDocumentText = "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
+  val opts = new MultilingualUniversalSchemaOpts
+  opts.parse(args)
+  // read in input text
+  val inputText = if (opts.inputFileName.wasInvoked) {
+    val inputSource = scala.io.Source.fromFile(opts.inputFileName.value)
+    val text = inputSource.getLines mkString "\n"
+    inputSource.close()
+    text
+  }
+  else // use some example text if input not given
+    "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
+
   // Document Representation for Entity linking
-  val elDoc = ELDocument("test", exampleDocumentText,lang=English)
+  val elDoc = ELDocument("test", inputText, lang=English)
   // Convert to a factorie document
   val fDoc = elDoc.toFactorieDocument
 
   EnglishNERMentionFinder.process(fDoc)
-  val linker = initializeLinker(args)
+  val linker = initializeLinker(opts)
   linker.process(fDoc)
   SlotFillingLogPatternRelationMentionFindingComponent.process1(fDoc)
 
-
-  println(formatDoc(fDoc))
+  val result = formatDoc(fDoc)
+  println(result)
+  if (opts.outputFileName.wasInvoked) {
+    val printWriter = new PrintWriter(opts.outputFileName.value)
+    printWriter.write(result + "\n")
+  }
 
   
-  def initializeLinker(args : Array[String]): LogisticRegressionTrainedLinker ={
-    val opts = new EntityEmbeddingOpts
-    opts.parse(args)
+  def initializeLinker(opts : MultilingualUniversalSchemaOpts): LogisticRegressionTrainedLinker ={
 
     // Load the typeDB
     val typeDB = TypeDB.fromCMDOptions(opts)
@@ -78,4 +92,10 @@ object RelationComponents extends ChainedNLPComponent {
     DeterministicSubstringNerCorefComponent,
     SlotFillingLogPatternRelationMentionFindingComponent
   )
+}
+
+class MultilingualUniversalSchemaOpts extends EntityEmbeddingOpts{
+  val inputFileName = new CmdOption[String]("input-filename", "inputFileName", "FILENAME", "The filename of the raw text input data.")
+  val outputFileName = new CmdOption[String]("output-filename", "outputFileName", "FILENAME", "File to output results to.")
+
 }
