@@ -19,7 +19,9 @@ object UniversalSchemaPipeline extends App
 {
   val opts = new MultilingualUniversalSchemaOpts
   opts.parse(args)
+
   // read in input text
+  print("Reading in text...")
   val inputText = if (opts.inputFileName.wasInvoked) {
     val inputSource = scala.io.Source.fromFile(opts.inputFileName.value, "ISO-8859-1") //UTF-8")
     val text = inputSource.getLines mkString "\n"
@@ -28,6 +30,7 @@ object UniversalSchemaPipeline extends App
   }
   else // use some example text if input not given
     "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
+  println("done.")
 
   // Document Representation for Entity linking
   val elDoc = ELDocument("test", inputText, lang=English)
