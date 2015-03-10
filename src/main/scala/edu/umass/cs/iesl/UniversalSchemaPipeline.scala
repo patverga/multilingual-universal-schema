@@ -21,7 +21,7 @@ object UniversalSchemaPipeline extends App
   opts.parse(args)
   // read in input text
   val inputText = if (opts.inputFileName.wasInvoked) {
-    val inputSource = scala.io.Source.fromFile(opts.inputFileName.value, "UTF-8")
+    val inputSource = scala.io.Source.fromFile(opts.inputFileName.value, "ISO-8859-1") //UTF-8")
     val text = inputSource.getLines mkString "\n"
     inputSource.close()
     text
