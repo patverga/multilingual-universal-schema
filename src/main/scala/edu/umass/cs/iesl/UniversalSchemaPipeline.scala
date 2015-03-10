@@ -32,16 +32,21 @@ object UniversalSchemaPipeline extends App
     "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
   println("done.")
 
+  println("Setting up ElDoc...")
   // Document Representation for Entity linking
   val elDoc = ELDocument("test", inputText, lang=English)
+  println("Converting to fac doc...")
   // Convert to a factorie document
   val fDoc = elDoc.toFactorieDocument
 
   EnglishNERMentionFinder.process(fDoc)
   val linker = initializeLinker(opts)
+  println("Entity Linking...")
   linker.process(fDoc)
+  println("Extracting Relations...")
   SlotFillingLogPatternRelationMentionFindingComponent.process1(fDoc)
 
+  println("Exporting Results...")
   val result = formatDoc(fDoc)
   println(result)
   if (opts.outputFileName.wasInvoked) {

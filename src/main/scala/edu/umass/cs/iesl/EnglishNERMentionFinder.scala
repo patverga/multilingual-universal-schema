@@ -35,6 +35,7 @@ class EnglishNERMentionFinder(lang: DocLanguage,caseSensitiveMentions:Boolean) e
   }
 
   def process(document: Document) = {
+    println("EnglishNERMentionFinder")
     if (!document.attr.contains(classOf[EntityLinks])) {
       println("Adding Entity Link Structure.")
       document.attr += new EntityLinks()
