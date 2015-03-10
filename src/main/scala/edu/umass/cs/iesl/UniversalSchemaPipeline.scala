@@ -79,8 +79,10 @@ object UniversalSchemaPipeline extends App
     val relationMentionList = doc.attr[RelationMentionList2]
     relationMentionList.foreach(rm => {
       rm._relations.foreach(r => {
-        sb.append(s"${Slug.unSlug(rm.arg1.entitySlug)}\t") //${rm.arg1.span.head.nerTag.baseCategoryValue}\t") // id1 nertag
-        sb.append(s"${Slug.unSlug(rm.arg2.entitySlug)}\t") //${rm.arg2.span.head.nerTag.baseCategoryValue}\t") // id2 nertag
+        val e1 = Slug.unSlug(rm.arg1.entitySlug)
+        val e2 = Slug.unSlug(rm.arg2.entitySlug)
+        sb.append(s"${e1}\t${FreebaseWikiBiMap(WikipediaId(e1))}\t") // id1 nertag
+        sb.append(s"${e2}\t${FreebaseWikiBiMap(WikipediaId(e2))}\t") // id2 nertag
         sb.append(s"${Slug.unSlug(rm.arg1.span.string)}\t${Slug.unSlug(rm.arg2.span.string)}\t") // string1 string2
         sb.append(s"${doc.name}\t") // docid
         sb.append(s"${rm.arg1.span.head.stringStart}-${rm.arg1.span.last.stringEnd}:") // first mention offsets
