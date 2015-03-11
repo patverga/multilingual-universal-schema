@@ -101,10 +101,10 @@ object UniversalSchemaPipeline extends App
         val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
         val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
         if (fbid1 != None && fbid2 != None) {
-          sb.append(s"$e1\t${rm.arg1.entitySlug}\t") // id1 nertag
-          sb.append(s"$e1\t${rm.arg2.entitySlug}\t") // id1 nertag
-          sb.append(s"$e1\t${fbid1.get}\t") // id1 nertag
-          sb.append(s"$e2\t${fbid2.get}\t") // id2 nertag
+          sb.append(s"$e1\t${rm.arg1.toString()}\t") // id1 nertag
+          sb.append(s"$e2\t${rm.arg2.toString()}\t") // id1 nertag
+          sb.append(s"${fbid1.get}\t") // id1 nertag
+          sb.append(s"${fbid2.get}\t") // id2 nertag
           sb.append(s"${Slug.unSlug(rm.arg1.span.string)}\t${Slug.unSlug(rm.arg2.span.string)}\t") // string1 string2
           sb.append(s"${doc.name}\t") // docid
           sb.append(s"${rm.arg1.span.head.stringStart}-${rm.arg1.span.last.stringEnd}:") // first mention offsets
