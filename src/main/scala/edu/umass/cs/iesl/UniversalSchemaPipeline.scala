@@ -100,11 +100,12 @@ object UniversalSchemaPipeline extends App
         val e2 = Slug.unSlug(rm.arg2.entitySlug)
         val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
         val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
-//        if (fbid1 != None && fbid2 != None) {
           sb.append(s"$e1\t${rm.arg1.toString()}\t") // id1 nertag
           sb.append(s"$e2\t${rm.arg2.toString()}\t") // id1 nertag
-          sb.append(s"${fbid1.get}\t") // id1 nertag
-          sb.append(s"${fbid2.get}\t") // id2 nertag
+          if (fbid1 != None && fbid2 != None) {
+            sb.append(s"${fbid1.get}\t") // id1 nertag
+            sb.append(s"${fbid2.get}\t") // id2 nertag
+          } else sb.append("NOFBID\tNOFBID\t")
           sb.append(s"${Slug.unSlug(rm.arg1.span.string)}\t${Slug.unSlug(rm.arg2.span.string)}\t") // string1 string2
           sb.append(s"${doc.name}\t") // docid
           sb.append(s"${rm.arg1.span.head.stringStart}-${rm.arg1.span.last.stringEnd}:") // first mention offsets
@@ -112,7 +113,6 @@ object UniversalSchemaPipeline extends App
           //        sb.append(s"${rm.arg1.span.sentence.head.stringStart}-${rm.arg2.span.sentence.last.stringEnd}\t") // whole sentence offsets
           sb.append(s"${r.provenance}") // evidence
           sb.append("\n")
-//        }
       })
     })
     sb.toString()
