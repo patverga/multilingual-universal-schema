@@ -19,7 +19,9 @@ object UniversalSchemaPipeline extends App
 {
   val opts = new MultilingualUniversalSchemaOpts
   opts.parse(args)
+
   val linker = initializeLinker(opts)
+  val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
 
   // load data and process each doc in parallel
   val result = loadData(opts).par.zipWithIndex.map{case(elDoc, i) =>
@@ -27,11 +29,8 @@ object UniversalSchemaPipeline extends App
     // Convert to a factorie document
     val fDoc = elDoc.toFactorieDocument
 
-    val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
     mentionFinder.process(fDoc)
-
     linker.process(fDoc)
-
     SlotFillingLogPatternRelationMentionFindingComponent.process1(fDoc)
 
     formatRelationsForExport(fDoc)
@@ -62,7 +61,7 @@ object UniversalSchemaPipeline extends App
         file2String(new File(opts.inputFileName.value))
       } // use some example text if input not given
       else if (opts.language.value == "es")
-        "La última vez que fui a Boston, que visitó la casa de Paul Revere en Quincy . También visitó la AMF y almorzaba con mi amigo en Harvard."
+        "La última vez que fui a Boston, que visitó la casa de Paul Revere en Quincy . También visitó la MFA y almorzaba con mi amigo en Harvard."
       else
         "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
       println("done.")
@@ -99,15 +98,21 @@ object UniversalSchemaPipeline extends App
       rm._relations.foreach(r => {
         val e1 = Slug.unSlug(rm.arg1.entitySlug)
         val e2 = Slug.unSlug(rm.arg2.entitySlug)
-        sb.append(s"${e1}\t${FreebaseWikiBiMap(WikipediaId(e1))}\t") // id1 nertag
-        sb.append(s"${e2}\t${FreebaseWikiBiMap(WikipediaId(e2))}\t") // id2 nertag
-        sb.append(s"${Slug.unSlug(rm.arg1.span.string)}\t${Slug.unSlug(rm.arg2.span.string)}\t") // string1 string2
-        sb.append(s"${doc.name}\t") // docid
-        sb.append(s"${rm.arg1.span.head.stringStart}-${rm.arg1.span.last.stringEnd}:") // first mention offsets
-        sb.append(s"${rm.arg2.span.head.stringStart}-${rm.arg2.span.last.stringEnd}:") // second mention offsets
-//        sb.append(s"${rm.arg1.span.sentence.head.stringStart}-${rm.arg2.span.sentence.last.stringEnd}\t") // whole sentence offsets
-        sb.append(s"${r.provenance}") // evidence
-        sb.append("\n")
+        val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
+        val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
+        if (fbid1 != None && fbid2 != None) {
+          sb.append(s"$e1\t${rm.arg1.entitySlug}\t") // id1 nertag
+          sb.append(s"$e1\t${rm.arg2.entitySlug}\t") // id1 nertag
+          sb.append(s"$e1\t${fbid1.get}\t") // id1 nertag
+          sb.append(s"$e2\t${fbid2.get}\t") // id2 nertag
+          sb.append(s"${Slug.unSlug(rm.arg1.span.string)}\t${Slug.unSlug(rm.arg2.span.string)}\t") // string1 string2
+          sb.append(s"${doc.name}\t") // docid
+          sb.append(s"${rm.arg1.span.head.stringStart}-${rm.arg1.span.last.stringEnd}:") // first mention offsets
+          sb.append(s"${rm.arg2.span.head.stringStart}-${rm.arg2.span.last.stringEnd}:") // second mention offsets
+          //        sb.append(s"${rm.arg1.span.sentence.head.stringStart}-${rm.arg2.span.sentence.last.stringEnd}\t") // whole sentence offsets
+          sb.append(s"${r.provenance}") // evidence
+          sb.append("\n")
+        }
       })
     })
     sb.toString()
