@@ -19,27 +19,23 @@ object UniversalSchemaPipeline extends App
 {
   val opts = new MultilingualUniversalSchemaOpts
   opts.parse(args)
+  val linker = initializeLinker(opts)
 
   // load data and process each doc in parallel
-  val result = loadData(opts).par.map(elDoc => {
-    println("Converting to fac doc...")
+  val result = loadData(opts).par.zipWithIndex.map{case(elDoc, i) =>
+    println(s"Processing document $i")
     // Convert to a factorie document
     val fDoc = elDoc.toFactorieDocument
 
-    println("Mention finding...")
     val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
     mentionFinder.process(fDoc)
 
-    println("Entity Linking...")
-    val linker = initializeLinker(opts)
     linker.process(fDoc)
 
-    println("Extracting Relations...")
     SlotFillingLogPatternRelationMentionFindingComponent.process1(fDoc)
 
-    println("Exporting Results...")
-    formatDoc(fDoc)
-  }).mkString("\n")
+    formatRelationsForExport(fDoc)
+  }.mkString("\n")
   println(result)
 
   if (opts.outputFileName.wasInvoked) {
@@ -96,7 +92,7 @@ object UniversalSchemaPipeline extends App
 
   }
   
-  def formatDoc(doc: Document): String = {
+  def formatRelationsForExport(doc: Document): String = {
     val sb = new StringBuilder
     val relationMentionList = doc.attr[EntityLinkedRelationMentionList]
     relationMentionList.foreach(rm => {
