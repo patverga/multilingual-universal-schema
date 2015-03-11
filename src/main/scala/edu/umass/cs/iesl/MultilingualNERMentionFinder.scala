@@ -1,5 +1,6 @@
 package edu.umass.cs.iesl
 
+import java.io.File
 import java.net.URL
 
 import cc.factorie.app.nlp.coref.ConllProperNounPhraseFinder
@@ -22,9 +23,9 @@ object EnglishNERMentionFinder extends MultilingualNERMentionFinder(English, fal
 
 object SpanishNERMentionFinder extends MultilingualNERMentionFinder(Spanish, false) {
   override def nerAndPosTag(unsluggedDoc: Document){
-    val posTagger = new SpanishChainPosTagger(new URL("/home/pat/canvas/models/ChainPOS-Spanish-IULA.factorie"))
+    val posTagger = new SpanishChainPosTagger(new File("/home/pat/canvas/models/ChainPOS-Spanish-IULA.factorie").toURI.toURL)
     posTagger.process(unsluggedDoc)
-    val nerTagger = new NoEmbeddingsConllStackedChainNer(new URL("/home/pat/canvas/models/StackedConllChainNer-SpanishConll2002.factorie"))
+    val nerTagger = new NoEmbeddingsConllStackedChainNer(new File("/home/pat/canvas/models/StackedConllChainNer-SpanishConll2002.factorie").toURI.toURL)
     nerTagger.process(unsluggedDoc)
   }
 }
