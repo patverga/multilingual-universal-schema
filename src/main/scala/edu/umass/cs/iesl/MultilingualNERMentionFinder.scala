@@ -22,9 +22,9 @@ object EnglishNERMentionFinder extends MultilingualNERMentionFinder(English, fal
 
 object SpanishNERMentionFinder extends MultilingualNERMentionFinder(Spanish, false) {
   override def nerAndPosTag(unsluggedDoc: Document){
-    val posTagger = new SpanishChainPosTagger(new URL("./models/ChainPOS-Spanish-IULA.factorie"))
+    val posTagger = new SpanishChainPosTagger(new URL("/home/pat/canvas/models/ChainPOS-Spanish-IULA.factorie"))
     posTagger.process(unsluggedDoc)
-    val nerTagger = new NoEmbeddingsConllStackedChainNer(new URL("./models/StackedConllChainNer-SpanishConll2002.factorie"))
+    val nerTagger = new NoEmbeddingsConllStackedChainNer(new URL("/home/pat/canvas/models/StackedConllChainNer-SpanishConll2002.factorie"))
     nerTagger.process(unsluggedDoc)
   }
 }
