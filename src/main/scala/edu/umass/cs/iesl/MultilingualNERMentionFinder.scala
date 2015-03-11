@@ -1,22 +1,36 @@
 package edu.umass.cs.iesl
 
+import java.net.URL
+
 import cc.factorie.app.nlp.coref.ConllProperNounPhraseFinder
 import cc.factorie.app.nlp.ner.NoEmbeddingsConllStackedChainNer
-import cc.factorie.app.nlp.parse.OntonotesTransitionBasedParser
-import cc.factorie.app.nlp.phrase.ParseAndNerBasedPhraseFinder
-import cc.factorie.app.nlp.pos.OntonotesForwardPosTagger
+import cc.factorie.app.nlp.pos.{SpanishChainPosTagger, OntonotesForwardPosTagger}
 import cc.factorie.app.nlp.segment.{DeterministicSentenceSegmenter, DeterministicTokenizer}
 import cc.factorie.app.nlp.{Document, Token, TokenSpan}
-import edu.umass.cs.iesl.entity_embeddings
 import edu.umass.cs.iesl.entity_embeddings.data_structures._
-import edu.umass.cs.iesl.entity_embeddings.data_structures.data_stores.SurfaceFormDB
 import edu.umass.cs.iesl.entity_embeddings.linking.MentionFinder
 
 
-object EnglishNERMentionFinder extends EnglishNERMentionFinder(English, false) {}
+object EnglishNERMentionFinder extends MultilingualNERMentionFinder(English, false) {
+  override def nerAndPosTag(unsluggedDoc: Document) {
+    OntonotesForwardPosTagger.process(unsluggedDoc)
+    NoEmbeddingsConllStackedChainNer.process(unsluggedDoc)
+    //    OntonotesTransitionBasedParser.process(unsluggedDoc)
+    //    ParseAndNerBasedPhraseFinder.process(unsluggedDoc)
+  }
+}
+
+object SpanishNERMentionFinder extends MultilingualNERMentionFinder(Spanish, false) {
+  override def nerAndPosTag(unsluggedDoc: Document){
+    val posTagger = new SpanishChainPosTagger(new URL("./models/ChainPOS-Spanish-IULA.factorie"))
+    posTagger.process(unsluggedDoc)
+    val nerTagger = new NoEmbeddingsConllStackedChainNer(new URL("./models/StackedConllChainNer-SpanishConll2002.factorie"))
+    nerTagger.process(unsluggedDoc)
+  }
+}
 
 //class EnlishNERMentionFinder(surfaceFormDB:SurfaceFormDB, lang: DocLanguage,caseSensitiveMentions:Boolean) extends MentionFinder {
-class EnglishNERMentionFinder(lang: DocLanguage,caseSensitiveMentions:Boolean) extends MentionFinder {
+abstract class MultilingualNERMentionFinder(lang: DocLanguage,caseSensitiveMentions:Boolean = false) extends MentionFinder {
 
   def prereqAttrs: Seq[Class[_]] = Seq(classOf[Token], classOf[DocLanguage])
 
@@ -52,13 +66,10 @@ class EnglishNERMentionFinder(lang: DocLanguage,caseSensitiveMentions:Boolean) e
       DeterministicSentenceSegmenter.process(res)
     }
 
-    OntonotesForwardPosTagger.process(unsluggedDoc)
-    NoEmbeddingsConllStackedChainNer.process(unsluggedDoc)
-//    OntonotesTransitionBasedParser.process(unsluggedDoc)
-//    ParseAndNerBasedPhraseFinder.process(unsluggedDoc)
+    nerAndPosTag(unsluggedDoc)
     val mentions = ConllProperNounPhraseFinder.apply(unsluggedDoc)
     unsluggedDoc.attr += mentions
-
+    
     val links = document.attr[EntityLinks]
     for (mention <- mentions) {
       // Note that mention will be unslugged so we need to slug it.
@@ -79,4 +90,5 @@ class EnglishNERMentionFinder(lang: DocLanguage,caseSensitiveMentions:Boolean) e
     }
     document
   }
+  def nerAndPosTag(unsluggedDoc: Document)
 }

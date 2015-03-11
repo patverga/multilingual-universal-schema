@@ -1,6 +1,6 @@
 package edu.umass.cs.iesl
 
-import java.io.PrintWriter
+import java.io.{File, PrintWriter}
 
 import cc.factorie.app.nlp.Document
 import cc.factorie.la.DenseTensor1
@@ -20,40 +20,62 @@ object UniversalSchemaPipeline extends App
   val opts = new MultilingualUniversalSchemaOpts
   opts.parse(args)
 
-  // read in input text
-  print("Reading in text...")
-  val inputText = if (opts.inputFileName.wasInvoked) {
-    val inputSource = scala.io.Source.fromFile(opts.inputFileName.value, "ISO-8859-1") //UTF-8")
-    val text = inputSource.getLines mkString "\n"
-    inputSource.close()
-    text
-  }
-  else // use some example text if input not given
-    "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
-  println("done.")
+  // load data and process each doc in parallel
+  val result = loadData(opts).par.map(elDoc => {
+    println("Converting to fac doc...")
+    // Convert to a factorie document
+    val fDoc = elDoc.toFactorieDocument
 
-  println("Setting up ElDoc...")
-  // Document Representation for Entity linking
-  val elDoc = ELDocument("test", inputText, lang=English)
-  println("Converting to fac doc...")
-  // Convert to a factorie document
-  val fDoc = elDoc.toFactorieDocument
+    println("Mention finding...")
+    val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
+    mentionFinder.process(fDoc)
 
-  EnglishNERMentionFinder.process(fDoc)
-  val linker = initializeLinker(opts)
-  println("Entity Linking...")
-  linker.process(fDoc)
-  println("Extracting Relations...")
-  SlotFillingLogPatternRelationMentionFindingComponent.process1(fDoc)
+    println("Entity Linking...")
+    val linker = initializeLinker(opts)
+    linker.process(fDoc)
 
-  println("Exporting Results...")
-  val result = formatDoc(fDoc)
+    println("Extracting Relations...")
+    SlotFillingLogPatternRelationMentionFindingComponent.process1(fDoc)
+
+    println("Exporting Results...")
+    formatDoc(fDoc)
+  }).mkString("\n")
   println(result)
+
   if (opts.outputFileName.wasInvoked) {
     val printWriter = new PrintWriter(opts.outputFileName.value)
     printWriter.write(result + "\n")
   }
 
+  def loadData(opts : MultilingualUniversalSchemaOpts) : Seq[ELDocument] ={
+    // read in input text
+    print("Reading in text...")
+    def file2String(f: File): String = {
+      val inputSource = scala.io.Source.fromFile(f, "ISO-8859-1") //UTF-8")
+      val text = inputSource.getLines mkString "\n"
+      inputSource.close()
+      text
+    }
+    if (opts.inputDirName.wasInvoked){
+      new File(opts.inputDirName.value).listFiles().toSeq.map(f => {
+        ELDocument(f.getName, file2String(f), lang = English)
+      })
+    }
+    else {
+      val inputText = if (opts.inputFileName.wasInvoked) {
+        file2String(new File(opts.inputFileName.value))
+      } // use some example text if input not given
+      else if (opts.language.value == "es")
+        "La última vez que fui a Boston, que visitó la casa de Paul Revere en Quincy . También visitó la AMF y almorzaba con mi amigo en Harvard."
+      else
+        "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
+      println("done.")
+
+      println("Setting up ElDoc...")
+      // Document Representation for Entity linking
+      Seq(ELDocument("test", inputText, lang = English))
+    }
+  }
 
   def initializeLinker(opts : MultilingualUniversalSchemaOpts): LogisticRegressionTrainedLinker ={
 
@@ -76,7 +98,7 @@ object UniversalSchemaPipeline extends App
   
   def formatDoc(doc: Document): String = {
     val sb = new StringBuilder
-    val relationMentionList = doc.attr[RelationMentionList2]
+    val relationMentionList = doc.attr[EntityLinkedRelationMentionList]
     relationMentionList.foreach(rm => {
       rm._relations.foreach(r => {
         val e1 = Slug.unSlug(rm.arg1.entitySlug)
@@ -97,15 +119,15 @@ object UniversalSchemaPipeline extends App
 
 }
 
-object RelationComponents extends ChainedNLPComponent {
-  lazy val components = Seq(
-    DeterministicSubstringNerCorefComponent,
-    SlotFillingLogPatternRelationMentionFindingComponent
-  )
-}
+//object RelationComponents extends ChainedNLPComponent {
+//  lazy val components = Seq(
+//    DeterministicSubstringNerCorefComponent,
+//    SlotFillingLogPatternRelationMentionFindingComponent
+//  )
+//}
 
 class MultilingualUniversalSchemaOpts extends EntityEmbeddingOpts{
   val inputFileName = new CmdOption[String]("input-filename", "inputFileName", "FILENAME", "The filename of the raw text input data.")
+  val inputDirName = new CmdOption[String]("input-directory", "inputDirName", "DIRNAME", "A directory containing different text files.")
   val outputFileName = new CmdOption[String]("output-filename", "outputFileName", "FILENAME", "File to output results to.")
-
 }
