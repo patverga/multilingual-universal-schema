@@ -3,13 +3,16 @@ package edu.umass.cs.iesl
 import java.io.File
 import java.net.URL
 
-import cc.factorie.app.nlp.coref.ConllProperNounPhraseFinder
-import cc.factorie.app.nlp.ner.NoEmbeddingsConllStackedChainNer
+import cc.factorie.app.nlp.coref.{MentionPhraseFinder, ConllProperNounPhraseFinder}
+import cc.factorie.app.nlp.ner.{BilouConllNerTag, NoEmbeddingsConllStackedChainNer}
+import cc.factorie.app.nlp.phrase.{ConllPhraseEntityType, Phrase}
 import cc.factorie.app.nlp.pos.{SpanishChainPosTagger, OntonotesForwardPosTagger}
 import cc.factorie.app.nlp.segment.{DeterministicSentenceSegmenter, DeterministicTokenizer}
 import cc.factorie.app.nlp.{Document, Token, TokenSpan}
 import edu.umass.cs.iesl.entity_embeddings.data_structures._
 import edu.umass.cs.iesl.entity_embeddings.linking.MentionFinder
+
+import scala.collection.mutable.ArrayBuffer
 
 
 object EnglishNERMentionFinder extends MultilingualNERMentionFinder(English, false) {
@@ -31,7 +34,7 @@ object SpanishNERMentionFinder extends MultilingualNERMentionFinder(Spanish, fal
 }
 
 //class EnlishNERMentionFinder(surfaceFormDB:SurfaceFormDB, lang: DocLanguage,caseSensitiveMentions:Boolean) extends MentionFinder {
-abstract class MultilingualNERMentionFinder(lang: DocLanguage,caseSensitiveMentions:Boolean = false) extends MentionFinder {
+abstract class MultilingualNERMentionFinder(lang: DocLanguage, caseSensitiveMentions:Boolean = false) extends MentionFinder {
 
   def prereqAttrs: Seq[Class[_]] = Seq(classOf[Token], classOf[DocLanguage])
 
@@ -50,7 +53,7 @@ abstract class MultilingualNERMentionFinder(lang: DocLanguage,caseSensitiveMenti
   }
 
   def process(document: Document) = {
-    println("EnglishNERMentionFinder")
+    println(lang.isoString + "NERMentionFinder")
     if (!document.attr.contains(classOf[EntityLinks])) {
       println("Adding Entity Link Structure.")
       document.attr += new EntityLinks()
@@ -68,7 +71,7 @@ abstract class MultilingualNERMentionFinder(lang: DocLanguage,caseSensitiveMenti
     }
 
     nerAndPosTag(unsluggedDoc)
-    val mentions = ConllProperNounPhraseFinder.apply(unsluggedDoc)
+    val mentions = ProperNounPhraseFinder.apply(unsluggedDoc)
     unsluggedDoc.attr += mentions
     
     val links = document.attr[EntityLinks]
@@ -91,5 +94,38 @@ abstract class MultilingualNERMentionFinder(lang: DocLanguage,caseSensitiveMenti
     }
     document
   }
+
   def nerAndPosTag(unsluggedDoc: Document)
+}
+
+
+object ProperNounPhraseFinder extends MentionPhraseFinder {
+  def prereqAttrs = Seq(classOf[BilouConllNerTag])
+  def apply(doc:Document): Seq[Phrase] = {
+    val result = new ArrayBuffer[Phrase]
+    for (section <- doc.sections; token <- section.tokens) {
+      if (token.attr[BilouConllNerTag].categoryValue != "O") {
+        val attr = token.attr[BilouConllNerTag].categoryValue.split("-")
+        if (attr(0) == "U") {
+          val phrase = new Phrase(section, token.positionInSection, length=1,offsetToHeadToken = -1)
+          phrase.attr += new ConllPhraseEntityType(phrase, attr(1))
+          result += phrase
+        } else if (attr(0) == "B") {
+          if (token.hasNext) {
+            var lookFor = token.next
+            while (lookFor.hasNext && lookFor.attr[BilouConllNerTag].categoryValue.matches("(I|L)-" + attr(1))) lookFor = lookFor.next
+            // TODO Be more clever in determining the headTokenOffset
+            val phrase = new Phrase(section, token.positionInSection, length=lookFor.positionInSection - token.positionInSection,offsetToHeadToken = -1)
+            phrase.attr += new ConllPhraseEntityType(phrase, attr(1))
+            result += phrase
+          } else {
+            val phrase = new Phrase(section, token.positionInSection, length=1,offsetToHeadToken = -1)
+            phrase.attr += new ConllPhraseEntityType(phrase, attr(1))
+            result += phrase
+          }
+        }
+      }
+    }
+    result
+  }
 }
