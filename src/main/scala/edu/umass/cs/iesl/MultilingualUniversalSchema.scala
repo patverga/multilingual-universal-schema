@@ -29,7 +29,7 @@ object TrainTestMultilingualUniversalSchema {
     opts.parse(args)
 
     val tReadStart = System.currentTimeMillis
-    var kb = EntityRelationKBMatrix.fromTsv(opts.tacData.value, colsPerEnt = 1)
+    var kb = EntityRelationKBMatrix.fromTsv(opts.tacData.value, colsPerEnt = 2)
     if (opts.prune.wasInvoked) kb = kb.prune(2,1)
 
     val tRead = (System.currentTimeMillis - tReadStart)/1000.0
