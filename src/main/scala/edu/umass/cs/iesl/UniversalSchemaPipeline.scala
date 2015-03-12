@@ -34,7 +34,7 @@ object UniversalSchemaPipeline extends App
     SlotFillingLogPatternRelationMentionFindingComponent.process1(fDoc)
 
     formatRelationsForExport(fDoc)
-  }.mkString()
+  }.mkString("")
   println(result)
 
   if (opts.outputFileName.wasInvoked) {
