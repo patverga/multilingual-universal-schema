@@ -62,16 +62,16 @@ class LogPatternsRelationMentions(entityTypePatternString: String) extends Docum
         m._relations += new TACRelation(pat, 1.0, pat)
         relationMentions += m
       }
-      // Entity2 is person or organization: add arg2 arg1 pattern
-      if (perOrgPattern.matcher(e2Type).matches) {
-        val pat = patternLog(toks, e2Start, e2End, e1Start, e1End)
-        //relationMentions += new RelationMention(m2, m1, "surface", pat)
-
-        // TODO: check effect of order with new relationmentions
-        val m = new EntityLinkedRelationMention(m1, m2, false) //, "surface", pat)
-        m._relations += new TACRelation(pat, 1.0, pat)
-        relationMentions += m
-      }
+//      // Entity2 is person or organization: add arg2 arg1 pattern
+//      if (perOrgPattern.matcher(e2Type).matches) {
+//        val pat = patternLog(toks, e2Start, e2End, e1Start, e1End)
+//        //relationMentions += new RelationMention(m2, m1, "surface", pat)
+//
+//        // TODO: check effect of order with new relationmentions
+//        val m = new EntityLinkedRelationMention(m1, m2, false) //, "surface", pat)
+//        m._relations += new TACRelation(pat, 1.0, pat)
+//        relationMentions += m
+//      }
     }
 
     document.attr += relationMentions
