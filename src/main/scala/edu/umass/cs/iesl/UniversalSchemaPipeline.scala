@@ -54,7 +54,7 @@ object UniversalSchemaPipeline extends App
     }
     if (opts.inputDirName.wasInvoked){
       new File(opts.inputDirName.value).listFiles().toSeq.map(f => {
-        ELDocument(f.getName, file2String(f), lang = English)
+        ELDocument(f.getName, file2String(f), lang = DocLanguage.fromIsoString(opts.language.value))
       })
     }
     else {
