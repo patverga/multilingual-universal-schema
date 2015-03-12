@@ -62,14 +62,14 @@ object UniversalSchemaPipeline extends App
         file2String(new File(opts.inputFileName.value))
       } // use some example text if input not given
       else if (opts.language.value == "es")
-        "La última vez que fui a Boston, que visitó la casa de Paul Revere en Quincy . También visitó la MFA y almorzaba con mi amigo en Harvard."
+        "La última vez que fui a Boston, que visitó la casa de Paul Revere en Quincy. También visitó la MFA y almorzaba con mi amigo en Harvard."
       else
         "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
       println("done.")
 
       println("Setting up ElDoc...")
       // Document Representation for Entity linking
-      Seq(ELDocument("test", inputText, lang = English))
+      Seq(ELDocument("test", inputText, lang = DocLanguage.fromIsoString(opts.language.value)))
     }
   }
 
