@@ -17,7 +17,7 @@ class TrainTestMultilingualUniversalSchemaOptions extends cc.factorie.util.Defau
 }
 
 
-object TrainTestTacData {
+object TrainTestMultilingualUniversalSchema {
 
   val opts = new TrainTestMultilingualUniversalSchemaOptions
 
