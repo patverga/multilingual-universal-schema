@@ -1,7 +1,9 @@
 package edu.umass.cs.iesl
 
 import java.io.File
+import java.util
 
+import scala.collection.mutable
 import scala.io.Source
 
 /**
@@ -43,3 +45,27 @@ object IdForm {
 case class WikipediaId(value:String) extends IdForm
 case class FreebaseId(value:String) extends IdForm
 case class SurfaceFormId(value:String) extends IdForm
+
+//object FreebaseRelationsFromMentions extends App {
+//  assert(args.length > 1, "must supply mention relation file and freebase-dump.rdf file.")
+//  // mention pairings we saw in the text
+//  val mentionPairs = new mutable.HashMap[String, Set[String]]
+//  // relations from freebase containing valid mention pairings
+//  val relations = new mutable.HashMap[String, Seq[(String, String)]]
+//
+//  // read in input mentions extracted from text
+//  val mentionSource = scala.io.Source.fromFile(args(0)) //UTF-8")
+//  mentionSource.getLines().foreach(line => {
+//    val (arg1, arg2, _, _) = line.split("\t")
+//    // TODO current freebase dump has entity urls not just id
+//    mentionPairs.put(arg1, mentionPairs.getOrElse(arg1, Set[String]()) + arg2)
+//  })
+//  mentionSource.close()
+//
+//  // read through freebase dump extracting relations
+//  val freebaseSource = scala.io.Source.fromFile(args(1)) //UTF-8")
+//  freebaseSource.getLines().foreach(line => {
+//    val tuple = line.split("\t")
+//  })
+//  freebaseSource.close()
+//}
