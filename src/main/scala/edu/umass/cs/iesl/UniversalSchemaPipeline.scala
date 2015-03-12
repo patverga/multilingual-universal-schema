@@ -40,6 +40,7 @@ object UniversalSchemaPipeline extends App
   if (opts.outputFileName.wasInvoked) {
     val printWriter = new PrintWriter(opts.outputFileName.value)
     printWriter.write(result + "\n")
+    printWriter.close()
   }
 
   def loadData(opts : MultilingualUniversalSchemaOpts) : Seq[ELDocument] ={
@@ -121,12 +122,6 @@ object UniversalSchemaPipeline extends App
 
 }
 
-//object RelationComponents extends ChainedNLPComponent {
-//  lazy val components = Seq(
-//    DeterministicSubstringNerCorefComponent,
-//    SlotFillingLogPatternRelationMentionFindingComponent
-//  )
-//}
 
 class MultilingualUniversalSchemaOpts extends EntityEmbeddingOpts{
   val inputFileName = new CmdOption[String]("input-filename", "inputFileName", "FILENAME", "The filename of the raw text input data.")

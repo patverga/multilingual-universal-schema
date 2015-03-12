@@ -8,7 +8,7 @@ import cc.factorie.epistemodb._
  */
 
 class TrainTestMultilingualUniversalSchemaOptions extends cc.factorie.util.DefaultCmdOptions {
-  val tacData = new CmdOption("tac-data", "", "FILE", "tab separated file with TAC training data")
+  val tacData = new CmdOption("training-data", "", "FILE", "tab separated file with training data of the form : e1 e2 rel score")
   val dim = new CmdOption("dim", 100, "INT", "dimensionality of data")
   val stepsize = new CmdOption("stepsize", 0.1, "DOUBLE", "step size")
   val maxNorm =  new CmdOption("max-norm", 1.0, "DOUBLE", "maximum l2-norm for vectors")
