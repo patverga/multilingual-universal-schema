@@ -15,7 +15,7 @@ import edu.umass.cs.iesl.entity_embeddings.util.FileIO
  */
 
 
-object UniversalSchemaPipeline extends App
+object ProcessDataForUniversalSchema extends App
 {
   val opts = new MultilingualUniversalSchemaOpts
   opts.parse(args)
