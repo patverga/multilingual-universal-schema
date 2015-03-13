@@ -16,6 +16,7 @@ object WikipediaProcessor extends App
   val entityResolver = EntityResolver.fromCMDOptions(opts, lang)
   val wikiProcessor = new LoadWikipediaArticlesCrossWikis(lang, entityResolver)
 
+  println(s"Processing wiki data at ${opts.inputFileName.value}")
   val wikiIterator = wikiProcessor.fromCompressedFilename(opts.inputFileName.value)
   var i = 0
   while (wikiIterator.hasNext){
