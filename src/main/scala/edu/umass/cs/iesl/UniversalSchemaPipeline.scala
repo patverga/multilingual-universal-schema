@@ -114,6 +114,9 @@ object UniversalSchemaPipeline extends App
           sb.append(s"${r.provenance}\t") // evidence
           sb.append("1.0\n")
 //          sb.append("\n")
+        } else {
+          if (fbid1 == None) print(s"Could not link $e1.\t")
+          if (fbid2 == None) print(s"Could not link $e2.\t")
         }
       })
     })
