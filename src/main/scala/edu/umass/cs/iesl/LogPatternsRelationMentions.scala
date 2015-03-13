@@ -1,18 +1,18 @@
 package edu.umass.cs.iesl
 
-import cc.factorie.app.nlp.coref.{Mention, WithinDocCoref}
-import cc.factorie.app.nlp.ner.NerTag
-import cc.factorie.app.nlp.pos.{PosTag, PennPosTag}
-import cc.factorie.app.nlp.relation.{RelationMention, TACRelationList, TACRelation}
 import cc.factorie.app.nlp._
+import cc.factorie.app.nlp.ner.NerTag
+import cc.factorie.app.nlp.pos.PosTag
+import cc.factorie.app.nlp.relation.{TACRelation, TACRelationList}
 import cc.factorie.util.Attr
 import cc.factorie.variable.ArrowVariable
-import edu.umass.cs.iesl.entity_embeddings.data_structures.{UnsluggedDocument, EntityRef, EntityLinks}
+import edu.umass.cs.iesl.entity_embeddings.data_structures.{EntityLinks, EntityRef, UnsluggedDocument}
 
 import scala.collection.mutable.ArrayBuffer
 
+object LogPatternsRelations extends LogPatternsRelations("(ORG|PER|LOC|ORGANIZATION|PERSON|LOCATION)")
 
-class LogPatternsRelationMentions(entityTypePatternString: String) extends DocumentAnnotator {
+class LogPatternsRelations(entityTypePatternString: String) extends DocumentAnnotator {
   val perOrgPattern = entityTypePatternString.r.pattern
 
   def process(document: Document): Document = {

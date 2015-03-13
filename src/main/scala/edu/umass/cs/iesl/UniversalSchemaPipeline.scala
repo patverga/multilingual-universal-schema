@@ -31,7 +31,7 @@ object UniversalSchemaPipeline extends App
 
     mentionFinder.process(fDoc)
     linker.process(fDoc)
-    SlotFillingLogPatternRelationMentionFindingComponent.process1(fDoc)
+    LogPatternsRelations.process(fDoc)
 
     formatRelationsForExport(fDoc)
   }.mkString("")
