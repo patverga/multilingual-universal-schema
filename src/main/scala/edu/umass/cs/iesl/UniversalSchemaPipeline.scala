@@ -116,7 +116,8 @@ object UniversalSchemaPipeline extends App
 //          sb.append("\n")
         } else {
           if (fbid1 == None) print(s"Could not link $e1.\t")
-          if (fbid2 == None) print(s"Could not link $e2.\t")
+          if (fbid2 == None) print(s"Could not link $e2.")
+          println()
         }
       })
     })
