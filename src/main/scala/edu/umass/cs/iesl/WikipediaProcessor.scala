@@ -42,7 +42,7 @@ object WikipediaProcessor extends App
         linker.process(fDoc)
         LogPatternsRelations.process(fDoc)
         val result = ProcessDataForUniversalSchema.formatRelationsForExport(fDoc)
-        ProcessDataForUniversalSchema.exportRelations(s"processed_wikis/${lang}/${i}_${wikiArticle.title}", result, append = true)
+        ProcessDataForUniversalSchema.exportRelations(s"processed_wikis/${opts.language.value}/${i}_${wikiArticle.title}", result, append = true)
         result
       })
       batch = new ArrayBuffer[ELDocument]
