@@ -24,16 +24,16 @@ object WikipediaProcessor extends App
 
   println(s"Processing wiki data at ${opts.inputFileName.value}")
   val wikiIterator = wikiProcessor.fromCompressedFilename(opts.inputFileName.value)
-  var batch = new ArrayBuffer[ELDocument]
+  var batch = new ArrayBuffer[(Int, ELDocument)]
   var i = 0
   while (wikiIterator.hasNext){
     val wikiArticle = wikiIterator.next()
-    batch += ELDocument(wikiArticle.title, wikiArticle.rawDocumentText, lang=lang)
+    batch += ((i, ELDocument(wikiArticle.title, wikiArticle.rawDocumentText, lang=lang)))
     i += 1
     if (i % batchSize == 0){
       println(i, batch.size)
       // load data and process each doc in parallel
-      batch.par.map (elDoc => {
+      batch.par.foreach {case (j, elDoc) =>
         //      println(s"Processing document $i")
         // Convert to a factorie document
         val fDoc = elDoc.toFactorieDocument
@@ -42,10 +42,9 @@ object WikipediaProcessor extends App
         linker.process(fDoc)
         LogPatternsRelations.process(fDoc)
         val result = ProcessDataForUniversalSchema.formatRelationsForExport(fDoc)
-        ProcessDataForUniversalSchema.exportRelations(s"processed_wikis/${opts.language.value}/${i}_${wikiArticle.title}", result, append = true)
-        result
-      })
-      batch = new ArrayBuffer[ELDocument]
+        ProcessDataForUniversalSchema.exportRelations(s"processed_wikis/${opts.language.value}/${j}_${elDoc.title}", result, append = true)
+      }
+      batch = new ArrayBuffer[(Int, ELDocument)]
     }
   }
 }
