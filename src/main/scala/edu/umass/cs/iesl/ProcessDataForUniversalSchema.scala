@@ -10,37 +10,52 @@ import edu.umass.cs.iesl.entity_embeddings.data_structures.data_stores.{Embeddin
 import edu.umass.cs.iesl.entity_embeddings.linking.LogisticRegressionTrainedLinker
 import edu.umass.cs.iesl.entity_embeddings.util.FileIO
 
+import scala.StringBuilder
+
 /**
  * Created by pv on 3/5/15.
  */
 
 
-object ProcessDataForUniversalSchema extends App
+object ProcessDataForUniversalSchema
 {
-  val opts = new MultilingualUniversalSchemaOpts
-  opts.parse(args)
+  def main(args : Array[String]) {
+    val opts = new MultilingualUniversalSchemaOpts
+    opts.parse(args)
 
-  val linker = initializeLinker(opts)
-  val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
+    val linker = initializeLinker(opts)
+    val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
 
-  // load data and process each doc in parallel
-  val result = loadData(opts).par.zipWithIndex.map{case(elDoc, i) =>
-    println(s"Processing document $i")
-    // Convert to a factorie document
-    val fDoc = elDoc.toFactorieDocument
+    val elDocs = loadData(opts)
+    val result = processELDocs(elDocs, mentionFinder, linker)
 
-    mentionFinder.process(fDoc)
-    linker.process(fDoc)
-    LogPatternsRelations.process(fDoc)
+    println(result)
 
-    formatRelationsForExport(fDoc)
-  }.mkString("")
-  println(result)
+    if (opts.outputFileName.wasInvoked) {
+      exportRelations(opts.outputFileName.value, result)
+    }
+  }
 
-  if (opts.outputFileName.wasInvoked) {
-    val printWriter = new PrintWriter(opts.outputFileName.value)
+  def exportRelations(outputFile :String, result: String): Unit = {
+    val printWriter = new PrintWriter(outputFile)
     printWriter.write(result + "\n")
     printWriter.close()
+  }
+
+  def processELDocs(elDocs : Seq[ELDocument], mentionFinder: MultilingualNERMentionFinder,
+                            linker : LogisticRegressionTrainedLinker): String = {
+    // load data and process each doc in parallel
+    elDocs.par.zipWithIndex.map { case (elDoc, i) =>
+      println(s"Processing document $i")
+      // Convert to a factorie document
+      val fDoc = elDoc.toFactorieDocument
+
+      mentionFinder.process(fDoc)
+      linker.process(fDoc)
+      LogPatternsRelations.process(fDoc)
+
+      formatRelationsForExport(fDoc)
+    }.mkString("")
   }
 
   def loadData(opts : MultilingualUniversalSchemaOpts) : Seq[ELDocument] ={
