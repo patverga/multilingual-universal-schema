@@ -32,7 +32,7 @@ object WikipediaProcessor extends App
     if (i % batchSize == 0){
       println(i, batch.size)
       val result = ProcessDataForUniversalSchema.processELDocs(batch, mentionFinder, linker)
-      ProcessDataForUniversalSchema.exportRelations(opts.outputFileName.value, result)
+      ProcessDataForUniversalSchema.exportRelations(opts.outputFileName.value, result, append = true)
       batch = new ArrayBuffer[ELDocument]
     }
   }

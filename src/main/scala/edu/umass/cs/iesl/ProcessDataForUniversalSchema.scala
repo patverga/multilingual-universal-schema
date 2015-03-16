@@ -1,6 +1,6 @@
 package edu.umass.cs.iesl
 
-import java.io.{File, PrintWriter}
+import java.io.{FileWriter, BufferedWriter, File, PrintWriter}
 
 import cc.factorie.app.nlp.Document
 import cc.factorie.la.DenseTensor1
@@ -36,8 +36,8 @@ object ProcessDataForUniversalSchema
     }
   }
 
-  def exportRelations(outputFile :String, result: String): Unit = {
-    val printWriter = new PrintWriter(outputFile)
+  def exportRelations(outputFile :String, result: String, append : Boolean = false): Unit = {
+    val printWriter = new PrintWriter(new BufferedWriter(new FileWriter(outputFile, append)))
     printWriter.write(result + "\n")
     printWriter.close()
   }

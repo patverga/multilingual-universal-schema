@@ -58,7 +58,9 @@ class LogPatternsRelations(entityTypePatternString: String) extends DocumentAnno
 //      if (perOrgPattern.matcher(e1Type).matches) {
         val pat = patternLog(toks, e1Start, e1End, e2Start, e2End)
         //relationMentions += new RelationMention(m1, m2, "surface", pat)
-        val m = new EntityLinkedRelationMention(m1, m2, true)
+
+      val isQueryFirst = e1End <= e2Start
+      val m = if (isQueryFirst) new EntityLinkedRelationMention(m1, m2, true) else new EntityLinkedRelationMention(m2, m1, true)
         m._relations += new TACRelation(pat, 1.0, pat)
         relationMentions += m
 //      }
@@ -89,8 +91,8 @@ class LogPatternsRelations(entityTypePatternString: String) extends DocumentAnno
     val isQueryFirst = qEnd <= slStart;
     val patStart = if (isQueryFirst) qEnd else slEnd
     val patEnd = if (isQueryFirst) slStart else qStart
-    val firstArg = if (isQueryFirst) "$ARG1" else "$ARG2"
-    val secondArg = if (isQueryFirst) "$ARG2" else "$ARG1"
+    val firstArg = "$ARG1" //if (isQueryFirst) "$ARG1" else "$ARG2"
+    val secondArg = "$ARG2" //if (isQueryFirst) "$ARG2" else "$ARG1"
     val pat =
       if (patStart == patEnd) {
         firstArg + " " + secondArg
