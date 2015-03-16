@@ -2,6 +2,7 @@ package edu.umass.cs.iesl
 
 import edu.umass.cs.iesl.entity_embeddings.data_structures.{Spanish, ELDocument, DocLanguage}
 import edu.umass.cs.iesl.entity_embeddings.embedding.EntityResolver
+import edu.umass.cs.iesl.entity_embeddings.linking.LogisticRegressionTrainedLinker
 import edu.umass.cs.iesl.entity_embeddings.load.LoadWikipediaArticlesCrossWikis
 
 import scala.collection.mutable.ArrayBuffer
@@ -11,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
  */
 object WikipediaProcessor extends App
 {
-  val batchSize = 1//28
+  val batchSize = 2000
   val opts = new MultilingualUniversalSchemaOpts
   opts.parse(args)
 
@@ -31,10 +32,20 @@ object WikipediaProcessor extends App
     i += 1
     if (i % batchSize == 0){
       println(i, batch.size)
-      val result = ProcessDataForUniversalSchema.processELDocs(batch, mentionFinder, linker)
-      ProcessDataForUniversalSchema.exportRelations(opts.outputFileName.value, result, append = true)
+      // load data and process each doc in parallel
+      batch.par.map (elDoc => {
+        //      println(s"Processing document $i")
+        // Convert to a factorie document
+        val fDoc = elDoc.toFactorieDocument
+
+        mentionFinder.process(fDoc)
+        linker.process(fDoc)
+        LogPatternsRelations.process(fDoc)
+        val result = ProcessDataForUniversalSchema.formatRelationsForExport(fDoc)
+        ProcessDataForUniversalSchema.exportRelations(s"processed_wikis/${lang}/${i}_${wikiArticle.title}", result, append = true)
+        result
+      })
       batch = new ArrayBuffer[ELDocument]
     }
   }
-
 }

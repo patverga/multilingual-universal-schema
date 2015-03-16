@@ -59,8 +59,7 @@ class LogPatternsRelations(entityTypePatternString: String) extends DocumentAnno
         val pat = patternLog(toks, e1Start, e1End, e2Start, e2End)
         //relationMentions += new RelationMention(m1, m2, "surface", pat)
 
-      val isQueryFirst = e1End <= e2Start
-      val m = if (isQueryFirst) new EntityLinkedRelationMention(m1, m2, true) else new EntityLinkedRelationMention(m2, m1, true)
+      val m = if (e1End <= e2Start) new EntityLinkedRelationMention(m1, m2, true) else new EntityLinkedRelationMention(m2, m1, true)
         m._relations += new TACRelation(pat, 1.0, pat)
         relationMentions += m
 //      }
