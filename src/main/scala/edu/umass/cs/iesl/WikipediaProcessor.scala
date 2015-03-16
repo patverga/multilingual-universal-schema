@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
  */
 object WikipediaProcessor extends App
 {
-  val batchSize = 128
+  val batchSize = 1//28
   val opts = new MultilingualUniversalSchemaOpts
   opts.parse(args)
 
