@@ -46,7 +46,7 @@ object ProcessDataForUniversalSchema
                             linker : LogisticRegressionTrainedLinker): String = {
     // load data and process each doc in parallel
     elDocs.par.zipWithIndex.map { case (elDoc, i) =>
-      println(s"Processing document $i")
+//      println(s"Processing document $i")
       // Convert to a factorie document
       val fDoc = elDoc.toFactorieDocument
 

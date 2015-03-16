@@ -53,7 +53,7 @@ abstract class MultilingualNERMentionFinder(lang: DocLanguage, caseSensitiveMent
   }
 
   def process(document: Document) = {
-    println(lang.isoString + "NERMentionFinder")
+//    println(lang.isoString + "NERMentionFinder")
     if (!document.attr.contains(classOf[EntityLinks])) {
       println("Adding Entity Link Structure.")
       document.attr += new EntityLinks()
