@@ -23,15 +23,17 @@ object WikipediaProcessor extends App
 
   println(s"Processing wiki data at ${opts.inputFileName.value}")
   val wikiIterator = wikiProcessor.fromCompressedFilename(opts.inputFileName.value)
-  var batch = new  ArrayBuffer[ELDocument]
+  var batch = new ArrayBuffer[ELDocument]
   var i = 0
   while (wikiIterator.hasNext){
     val wikiArticle = wikiIterator.next()
     batch += ELDocument(wikiArticle.title, wikiArticle.rawDocumentText, lang=lang)
     i += 1
     if (i % batchSize == 0){
+      println(i, batch.size)
       val result = ProcessDataForUniversalSchema.processELDocs(batch, mentionFinder, linker)
       ProcessDataForUniversalSchema.exportRelations(opts.outputFileName.value, result)
+      batch = new ArrayBuffer[ELDocument]
     }
   }
 
