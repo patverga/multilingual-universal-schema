@@ -67,12 +67,15 @@ object ExportWikis extends App
   var dirName = "0"
   var i = 1
   while (wikiIterator.hasNext){
-    if (i % filesPerDir == 0) dirName = (dirName.toInt+1).toString
-    val dir = new File(dirName)
-    if (!dir.exists()) dir.mkdirs()
     val wikiArticle = wikiIterator.next()
-    ProcessDataForUniversalSchema.exportRelations(s"wikis/${opts.language.value}/${wikiArticle.title.replaceAll(" ", "_")}.bz",
-      wikiArticle.rawDocumentText, append = false, compress = true)
-
+    val outDir = s"wikis/$dirName/${opts.language.value}"
+    val outDirFile = new File(outDir)
+    if (!outDirFile.exists()) outDirFile.mkdirs()
+    val outFile = s"$outDir/${wikiArticle.title.replaceAll(" ","_")}.bz"
+    if (i % filesPerDir == 0) {
+      dirName = (dirName.toInt + 1).toString
+      println(i, outFile)
+    }
+    ProcessDataForUniversalSchema.exportRelations(outFile, wikiArticle.rawDocumentText, append = false, compress = true)
   }
 }
