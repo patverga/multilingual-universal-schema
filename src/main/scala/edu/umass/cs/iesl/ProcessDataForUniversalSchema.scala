@@ -1,19 +1,22 @@
 package edu.umass.cs.iesl
 
 import cc.factorie.app.nlp.Document
+import cc.factorie.app.nlp.relation.RelationMentionList
 import cc.factorie.la.DenseTensor1
 import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
 import edu.umass.cs.iesl.entity_embeddings.data_structures._
 import edu.umass.cs.iesl.entity_embeddings.data_structures.data_stores.{EmbeddingCollection, SurfaceFormDB, TypeDB}
 import edu.umass.cs.iesl.entity_embeddings.linking.LogisticRegressionTrainedLinker
 import edu.umass.cs.iesl.entity_embeddings.util.FileIO
+import edu.umass.cs.iesl.oldtaccode.FreebaseLinker
 
 /**
  * Created by pv on 3/5/15.
  */
 
+class ProcessDataForUniversalSchema
 
-object ProcessDataForUniversalSchema
+object ProcessDataForUniversalSchema extends ProcessDataForUniversalSchema
 {
   def main(args : Array[String]) {
     val opts = new MultilingualUniversalSchemaOpts
@@ -99,6 +102,66 @@ object ProcessDataForUniversalSchema
     sb.toString()
   }
 
+}
+
+object ProcessDataForUniversalSchemaTac extends ProcessDataForUniversalSchema
+{
+  def main(args : Array[String]) {
+    val opts = new MultilingualUniversalSchemaOpts
+    opts.parse(args)
+
+    val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
+
+    val elDocs = IO.loadPlainTextTestData(opts)
+    val result = process(elDocs, mentionFinder)
+
+    println(result)
+
+    if (opts.outputFileName.wasInvoked) {
+      IO.exportStringToFile(opts.outputFileName.value, result)
+    }
+  }
+
+  def process(elDocs : Seq[ELDocument], mentionFinder: MultilingualNERMentionFinder): String = {
+    // load data and process each doc in parallel
+    elDocs.par.zipWithIndex.map { case (elDoc, i) =>
+      //      println(s"Processing document $i")
+      // Convert to a factorie document
+      val fDoc = elDoc.toFactorieDocument
+
+      mentionFinder.process(fDoc)
+      DeterministicSubstringCoref.process(fDoc)
+      val linker = FreebaseLinker.default
+      linker.process(fDoc)
+
+      LogPatternsRelations.process(fDoc)
+
+      formatDoc(fDoc)
+    }.mkString("")
+  }
+
+  def formatDoc(doc: Document): String = {
+    val sb = new StringBuilder
+    val relationMentionList = doc.attr[RelationMentionList]
+    relationMentionList.foreach(rm => {
+      rm._relations.foreach(r => {
+        //        println("fb " +rm.arg1.entity.attr[FreebaseId])
+        //        println("wiki " +rm.arg1.entity.attr[WikipediaId])
+        //        println("sf "+rm.arg1.entity.attr[SurfaceFormId])
+
+        sb.append(s"${rm.arg1.entity.attr[IdForm].value}\t${rm.arg1.phrase.head.nerTag.baseCategoryValue}\t") // id1 nertag
+        sb.append(s"${rm.arg2.entity.attr[IdForm].value}\t${rm.arg2.phrase.head.nerTag.baseCategoryValue}\t") // id2 nertag
+        sb.append(s"${rm.arg1.string}\t${rm.arg2.string}\t") // string1 string2
+        sb.append(s"${doc.name}\t") // docid
+        sb.append(s"${rm.arg1.phrase.head.stringStart}-${rm.arg1.phrase.last.stringEnd}:") // first mention offsets
+        sb.append(s"${rm.arg2.phrase.head.stringStart}-${rm.arg2.phrase.last.stringEnd}:") // second mention offsets
+        sb.append(s"${rm.arg1.phrase.sentence.head.stringStart}-${rm.arg2.phrase.sentence.last.stringEnd}\t") // whole sentence offsets
+        sb.append(s"${r.provenance}") // evidence
+        sb.append("\n")
+      })
+    })
+    sb.toString
+  }
 }
 
 

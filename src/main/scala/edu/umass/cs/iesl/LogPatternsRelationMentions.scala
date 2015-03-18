@@ -1,9 +1,10 @@
 package edu.umass.cs.iesl
 
 import cc.factorie.app.nlp._
+import cc.factorie.app.nlp.coref.WithinDocCoref
 import cc.factorie.app.nlp.ner.NerTag
 import cc.factorie.app.nlp.pos.PosTag
-import cc.factorie.app.nlp.relation.{TACRelation, TACRelationList}
+import cc.factorie.app.nlp.relation.{RelationMention, RelationMentionList, TACRelation, TACRelationList}
 import cc.factorie.util.Attr
 import cc.factorie.variable.ArrowVariable
 import edu.umass.cs.iesl.entity_embeddings.data_structures.{EntityLinks, EntityRef, UnsluggedDocument}
@@ -104,6 +105,47 @@ class LogPatternsRelations(entityTypePatternString: String) extends DocumentAnno
       }
     pat
   }
+}
+
+object TacLogPatternsRelations extends LogPatternsRelations("(ORG|PER|LOC|ORGANIZATION|PERSON|LOCATION)")
+{
+  override def process(document : Document): Document =
+  {
+    val coref = document.attr[WithinDocCoref]
+    val relationMentions = new RelationMentionList
+
+    val mentions = coref.mentions.sortBy(_.phrase.asInstanceOf[TokenSpan]).toList
+
+    /** this produces a sliding window of 4 mentions that we then compare to generate contexts. Each mention should be compared
+      * to the three mentions before and after it in the following loop. The last element is a singleton list which we drop.
+      * The last mention in the document has already been compared to the three mentions that preceed it.
+      * */
+    val mentionGrouping = (0 until mentions.size).map(idx => mentions.slice(idx, math.min(idx + 4, mentions.size))).dropRight(1)
+    println("mention groupings: "+ mentionGrouping.length + "\t\t mentions: " + mentions.size)
+    for(m1 :: ms <- mentionGrouping;
+        m2 <- ms;
+        e1 = m1.phrase;
+        e2 = m2.phrase;
+        e1Type = e1.headToken.nerTag.baseCategoryValue;
+        e2Type = e2.headToken.nerTag.baseCategoryValue;
+        e1Start = e1.tokens(0).positionInSentence;
+        e1End = e1.tokens.last.positionInSentence + 1;
+        e2Start = e2.tokens(0).positionInSentence;
+        e2End = e2.tokens.last.positionInSentence + 1;
+        toks = e1.sentence.tokens.map(_.string).toArray;
+        if e1.sentence == e2.sentence) {
+
+      val pat = patternLog(toks, e1Start, e1End, e2Start, e2End)
+      val m = if (e1End <= e2Start) new RelationMention(m1, m2, true) else new RelationMention(m2, m1, true)
+      m._relations += new TACRelation(pat, 1.0, pat)
+      relationMentions += m
+    }
+
+    document.attr += relationMentions
+    document
+  }
+
+
 }
 
 class EntityLinkedRelationMention(val arg1: EntityRef, val arg2: EntityRef, var isArg1First: Boolean = true) extends ArrowVariable(arg1, arg2) with Attr {
