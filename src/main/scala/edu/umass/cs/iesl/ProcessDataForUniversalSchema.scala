@@ -8,7 +8,7 @@ import edu.umass.cs.iesl.entity_embeddings.data_structures._
 import edu.umass.cs.iesl.entity_embeddings.data_structures.data_stores.{EmbeddingCollection, SurfaceFormDB, TypeDB}
 import edu.umass.cs.iesl.entity_embeddings.linking.LogisticRegressionTrainedLinker
 import edu.umass.cs.iesl.entity_embeddings.util.FileIO
-import edu.umass.cs.iesl.oldtaccode.FreebaseLinker
+import edu.umass.cs.iesl.oldtaccode.{IdForm, FreebaseLinker}
 
 /**
  * Created by pv on 3/5/15.
@@ -71,35 +71,36 @@ object ProcessDataForUniversalSchema extends ProcessDataForUniversalSchema
   }
   
   def formatRelationsForExport(doc: Document): String = {
-    val sb = new StringBuilder
-    val relationMentionList = doc.attr[EntityLinkedRelationMentionList]
-    relationMentionList.foreach(rm => {
-      rm._relations.foreach(r => {
-        val e1 = Slug.unSlug(rm.arg1.entitySlug)
-        val e2 = Slug.unSlug(rm.arg2.entitySlug)
-        val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
-        val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
-        if (fbid1 != None && fbid2 != None) {
-//          sb.append(s"$e1\t${rm.arg1.toString()}\t") // id1 nertag
-//          sb.append(s"$e2\t${rm.arg2.toString()}\t") // id1 nertag
-          sb.append(s"$e1\t${fbid1.get.value}\t") // id1 nertag
-          sb.append(s"$e2\t${fbid2.get.value}\t") // id2 nertag
-//          sb.append(s"${Slug.unSlug(rm.arg1.span.string)}\t${Slug.unSlug(rm.arg2.span.string)}\t") // string1 string2
-//          sb.append(s"${doc.name}\t") // docid
-//          sb.append(s"${rm.arg1.span.head.stringStart}-${rm.arg1.span.last.stringEnd}:") // first mention offsets
-//          sb.append(s"${rm.arg2.span.head.stringStart}-${rm.arg2.span.last.stringEnd}:") // second mention offsets
-          //        sb.append(s"${rm.arg1.span.sentence.head.stringStart}-${rm.arg2.span.sentence.last.stringEnd}\t") // whole sentence offsets
-          sb.append(s"${r.provenance}\t") // evidence
-          sb.append("1.0\n")
-//          sb.append("\n")
-        } else {
-          if (fbid1 == None) print(s"Could not link $e1.\t")
-          if (fbid2 == None) print(s"Could not link $e2.")
-          println()
-        }
-      })
-    })
-    sb.toString()
+//    val sb = new StringBuilder
+//    val relationMentionList = doc.attr[EntityLinkedRelationMentionList]
+//    relationMentionList.foreach(rm => {
+//      rm._relations.foreach(r => {
+//        val e1 = Slug.unSlug(rm.arg1.entitySlug)
+//        val e2 = Slug.unSlug(rm.arg2.entitySlug)
+//        val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
+//        val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
+//        if (fbid1 != None && fbid2 != None) {
+////          sb.append(s"$e1\t${rm.arg1.toString()}\t") // id1 nertag
+////          sb.append(s"$e2\t${rm.arg2.toString()}\t") // id1 nertag
+//          sb.append(s"$e1\t${fbid1.get.value}\t") // id1 nertag
+//          sb.append(s"$e2\t${fbid2.get.value}\t") // id2 nertag
+////          sb.append(s"${Slug.unSlug(rm.arg1.span.string)}\t${Slug.unSlug(rm.arg2.span.string)}\t") // string1 string2
+////          sb.append(s"${doc.name}\t") // docid
+////          sb.append(s"${rm.arg1.span.head.stringStart}-${rm.arg1.span.last.stringEnd}:") // first mention offsets
+////          sb.append(s"${rm.arg2.span.head.stringStart}-${rm.arg2.span.last.stringEnd}:") // second mention offsets
+//          //        sb.append(s"${rm.arg1.span.sentence.head.stringStart}-${rm.arg2.span.sentence.last.stringEnd}\t") // whole sentence offsets
+//          sb.append(s"${r.provenance}\t") // evidence
+//          sb.append("1.0\n")
+////          sb.append("\n")
+//        } else {
+//          if (fbid1 == None) print(s"Could not link $e1.\t")
+//          if (fbid2 == None) print(s"Could not link $e2.")
+//          println()
+//        }
+//      })
+//    })
+//    sb.toString()
+    ""
   }
 
 }
