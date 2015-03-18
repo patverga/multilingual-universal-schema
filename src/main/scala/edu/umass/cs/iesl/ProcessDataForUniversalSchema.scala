@@ -1,7 +1,5 @@
 package edu.umass.cs.iesl
 
-import java.io._
-
 import cc.factorie.app.nlp.Document
 import cc.factorie.la.DenseTensor1
 import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
@@ -9,9 +7,6 @@ import edu.umass.cs.iesl.entity_embeddings.data_structures._
 import edu.umass.cs.iesl.entity_embeddings.data_structures.data_stores.{EmbeddingCollection, SurfaceFormDB, TypeDB}
 import edu.umass.cs.iesl.entity_embeddings.linking.LogisticRegressionTrainedLinker
 import edu.umass.cs.iesl.entity_embeddings.util.FileIO
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
-
-import scala.StringBuilder
 
 /**
  * Created by pv on 3/5/15.
@@ -27,21 +22,14 @@ object ProcessDataForUniversalSchema
     val linker = initializeLinker(opts)
     val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
 
-    val elDocs = loadData(opts)
+    val elDocs = IO.loadPlainTextTestData(opts)
     val result = processELDocs(elDocs, mentionFinder, linker)
 
     println(result)
 
     if (opts.outputFileName.wasInvoked) {
-      exportRelations(opts.outputFileName.value, result)
+      IO.exportStringToFile(opts.outputFileName.value, result)
     }
-  }
-
-  def exportRelations(outputFile :String, result: String, append : Boolean = false, compress : Boolean = false): Unit = {
-    val outputStream = new FileOutputStream(outputFile, append)
-    val printWriter = new PrintWriter(if (compress) new BZip2CompressorOutputStream(outputStream) else outputStream)
-    printWriter.write(result + "\n")
-    printWriter.close()
   }
 
   def processELDocs(elDocs : Seq[ELDocument], mentionFinder: MultilingualNERMentionFinder,
@@ -58,36 +46,6 @@ object ProcessDataForUniversalSchema
 
       formatRelationsForExport(fDoc)
     }.mkString("")
-  }
-
-  def loadData(opts : MultilingualUniversalSchemaOpts) : Seq[ELDocument] ={
-    // read in input text
-    print("Reading in text...")
-    def file2String(f: File): String = {
-      val inputSource = scala.io.Source.fromFile(f, "ISO-8859-1") //UTF-8")
-      val text = inputSource.getLines mkString "\n"
-      inputSource.close()
-      text
-    }
-    if (opts.inputDirName.wasInvoked){
-      new File(opts.inputDirName.value).listFiles().toSeq.map(f => {
-        ELDocument(f.getName, file2String(f), lang = DocLanguage.fromIsoString(opts.language.value))
-      })
-    }
-    else {
-      val inputText = if (opts.inputFileName.wasInvoked) {
-        file2String(new File(opts.inputFileName.value))
-      } // use some example text if input not given
-      else if (opts.language.value == "es")
-        "La última vez que fui a Boston, que visitó la casa de Paul Revere en Quincy. También visitó la MFA y almorzaba con mi amigo en Harvard."
-      else
-        "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
-      println("done.")
-
-      println("Setting up ElDoc...")
-      // Document Representation for Entity linking
-      Seq(ELDocument("test", inputText, lang = DocLanguage.fromIsoString(opts.language.value)))
-    }
   }
 
   def initializeLinker(opts : MultilingualUniversalSchemaOpts): LogisticRegressionTrainedLinker ={
