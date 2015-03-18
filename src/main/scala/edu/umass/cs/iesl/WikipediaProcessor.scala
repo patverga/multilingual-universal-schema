@@ -2,7 +2,6 @@ package edu.umass.cs.iesl
 
 import java.io.File
 
-import edu.umass.cs.iesl.ExportWikis._
 import edu.umass.cs.iesl.entity_embeddings.data_structures.{DocLanguage, Spanish, ELDocument}
 import edu.umass.cs.iesl.entity_embeddings.embedding.EntityResolver
 import edu.umass.cs.iesl.entity_embeddings.linking.LogisticRegressionTrainedLinker
