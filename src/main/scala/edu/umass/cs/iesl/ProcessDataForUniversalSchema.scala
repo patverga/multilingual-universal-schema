@@ -1,6 +1,6 @@
 package edu.umass.cs.iesl
 
-import java.io.{FileWriter, BufferedWriter, File, PrintWriter}
+import java.io._
 
 import cc.factorie.app.nlp.Document
 import cc.factorie.la.DenseTensor1
@@ -9,6 +9,7 @@ import edu.umass.cs.iesl.entity_embeddings.data_structures._
 import edu.umass.cs.iesl.entity_embeddings.data_structures.data_stores.{EmbeddingCollection, SurfaceFormDB, TypeDB}
 import edu.umass.cs.iesl.entity_embeddings.linking.LogisticRegressionTrainedLinker
 import edu.umass.cs.iesl.entity_embeddings.util.FileIO
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 
 import scala.StringBuilder
 
@@ -36,8 +37,9 @@ object ProcessDataForUniversalSchema
     }
   }
 
-  def exportRelations(outputFile :String, result: String, append : Boolean = false): Unit = {
-    val printWriter = new PrintWriter(new BufferedWriter(new FileWriter(outputFile, append)))
+  def exportRelations(outputFile :String, result: String, append : Boolean = false, compress : Boolean = false): Unit = {
+    val outputStream = new FileOutputStream(outputFile, append)
+    val printWriter = new PrintWriter(if (compress) new BZip2CompressorOutputStream(outputStream) else outputStream)
     printWriter.write(result + "\n")
     printWriter.close()
   }
