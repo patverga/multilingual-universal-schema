@@ -2,7 +2,6 @@ package edu.umass.cs.iesl.dataUtils
 
 import java.io.File
 
-import edu.umass.cs.iesl._
 import edu.umass.cs.iesl.entity_embeddings.data_structures.{DocLanguage, ELDocument}
 import edu.umass.cs.iesl.entity_embeddings.embedding.EntityResolver
 import edu.umass.cs.iesl.entity_embeddings.load.LoadWikipediaArticlesCrossWikis
