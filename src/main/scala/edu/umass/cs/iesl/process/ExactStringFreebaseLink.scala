@@ -33,7 +33,7 @@ abstract class ExactStringFreebaseLink(idNameFile : String) extends EntityLinker
   
   def linkName(name : String) : Option[String] ={
     val fid = if (idNameMap.contains(name)) idNameMap.get(name) else None   
-    if (fid != None) println(s"Sucessfully linked $name") else println ("Could not link name")
+    if (fid != None) println(s"Sucessfully linked $name") else println (s"Could not link $name")
     fid
   }
 }
