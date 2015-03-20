@@ -26,8 +26,11 @@ object ExactStringFreebaseLink extends ExactStringFreebaseLink("/home/pat/data/f
 abstract class ExactStringFreebaseLink(idNameFile : String) extends EntityLinker
 {   
   val idNameMap = Source.fromFile(idNameFile).getLines().map { line =>
-    val Array(fId, name) = line.split("\t")
-    (fId, name)
+//    val Array(fId, name) = line.split("\t")
+//    (fId, name)
+//  }.toMap
+  val parts = line.split("\t")
+    (parts(0), parts(parts.length-1))
   }.toMap
   
   def linkName(name : String) : Option[String] ={
