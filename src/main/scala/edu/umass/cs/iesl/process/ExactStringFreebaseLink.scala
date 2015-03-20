@@ -29,11 +29,16 @@ abstract class ExactStringFreebaseLink(idNameFile : String) extends EntityLinker
 //    val Array(fId, name) = line.split("\t")
 //    (fId, name)
 //  }.toMap
-  val parts = line.split("\t")
-    (parts(0), parts(parts.length-1))
+    val parts = line.split("\t")
+    val namePart = parts(parts.length-1)
+    val name = namePart.substring(1, namePart.length-3)
+    println(name)
+    (name, parts(0))
   }.toMap
   
   def linkName(name : String) : Option[String] ={
-    if (idNameMap.contains(name)) idNameMap.get(name) else None   
+    val fid = if (idNameMap.contains(name)) idNameMap.get(name) else None   
+    if (fid != None) println(s"Sucessfully linked $name") else println ("Could not link name")
+    fid
   }
 }
