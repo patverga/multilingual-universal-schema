@@ -10,7 +10,7 @@ import scala.io.Source
  * Created by pv on 3/20/15.
  */
 
-object ExactStringFreebaseLink extends ExactStringFreebaseLink("/home/pat/data/freebase/test_names") {
+object ExactStringFreebaseLink extends ExactStringFreebaseLink("/home/pat/data/freebase/english_freebase_names") {
 
   override def process(document: Document): Document = {
     val mentions = document.attr[EntityLinks].mentions.toArray
@@ -26,15 +26,10 @@ object ExactStringFreebaseLink extends ExactStringFreebaseLink("/home/pat/data/f
 abstract class ExactStringFreebaseLink(idNameFile : String) extends EntityLinker
 {   
   val idNameMap = Source.fromFile(idNameFile).getLines().map { line =>
-//    val Array(fId, name) = line.split("\t")
-//    (fId, name)
-//  }.toMap
-    val parts = line.split("\t")
-    val namePart = parts(parts.length-1)
-    val name = namePart.substring(1, namePart.length-3)
-    println(name)
-    (name, parts(0))
+    val Array(fId, name) = line.split("\t")
+    (name, fId)
   }.toMap
+
   
   def linkName(name : String) : Option[String] ={
     val fid = if (idNameMap.contains(name)) idNameMap.get(name) else None   
