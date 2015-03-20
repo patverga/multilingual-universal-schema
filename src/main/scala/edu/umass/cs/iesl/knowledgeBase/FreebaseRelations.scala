@@ -1,12 +1,11 @@
-package edu.umass.cs.iesl
+package edu.umass.cs.iesl.knowledgeBase
 
-import java.io.{File, PrintWriter}
+import java.io.PrintWriter
 
 import cc.factorie.util.CmdOptions
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 
 /**
  * Created by pv on 3/10/15.

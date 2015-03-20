@@ -1,13 +1,14 @@
-package edu.umass.cs.iesl
+package edu.umass.cs.iesl.process
 
 import java.io.File
 
 import cc.factorie.app.nlp.coref.MentionPhraseFinder
 import cc.factorie.app.nlp.ner.{BilouConllNerTag, NoEmbeddingsConllStackedChainNer}
 import cc.factorie.app.nlp.phrase.{ConllPhraseEntityType, Phrase}
-import cc.factorie.app.nlp.pos.{OntonotesForwardPosTagger, SpanishChainPosTagger}
+import cc.factorie.app.nlp.pos.{SpanishChainPosTagger, OntonotesForwardPosTagger}
 import cc.factorie.app.nlp.segment.{DeterministicSentenceSegmenter, DeterministicTokenizer}
 import cc.factorie.app.nlp.{Document, Token, TokenSpan}
+import edu.umass.cs.iesl.entity_embeddings
 import edu.umass.cs.iesl.entity_embeddings.data_structures._
 import edu.umass.cs.iesl.entity_embeddings.linking.MentionFinder
 

@@ -1,10 +1,12 @@
-package edu.umass.cs.iesl
+package edu.umass.cs.iesl.dataUtils
 
 import java.io.File
 
-import edu.umass.cs.iesl.entity_embeddings.data_structures.{ELDocument, DocLanguage}
+import edu.umass.cs.iesl._
+import edu.umass.cs.iesl.entity_embeddings.data_structures.{DocLanguage, ELDocument}
 import edu.umass.cs.iesl.entity_embeddings.embedding.EntityResolver
 import edu.umass.cs.iesl.entity_embeddings.load.LoadWikipediaArticlesCrossWikis
+import edu.umass.cs.iesl.process._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -26,7 +28,7 @@ object WikipediaProcessor extends App
   val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
 
   val batchSize = 2000
-  val linker = ProcessDataForUniversalSchema.initializeLinker(opts)
+  val linker = EmbeddingEntityLinkedProcesser.initializeLinker(opts)
   println(s"Processing wiki data at ${opts.inputFileName.value}")
   var batch = new ArrayBuffer[(Int, ELDocument)]
   var i = 0
@@ -44,8 +46,8 @@ object WikipediaProcessor extends App
 
         mentionFinder.process(fDoc)
         linker.process(fDoc)
-        LogPatternsRelations.process(fDoc)
-        val result = ProcessDataForUniversalSchema.formatRelationsForExport(fDoc)
+        EntityLinkedLogPatternsRelations.process(fDoc)
+        val result = EmbeddingEntityLinkedProcesser.formatRelationsForExport(fDoc)
         IO.exportStringToFile(s"processed_wikis/${opts.language.value}/${j}_${elDoc.title}", result, append = true)
       }
       batch = new ArrayBuffer[(Int, ELDocument)]

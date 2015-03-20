@@ -1,13 +1,9 @@
-package edu.umass.cs.iesl
+package edu.umass.cs.iesl.dataUtils
 
 import java.io.{File, FileOutputStream, PrintWriter}
-
 import edu.umass.cs.iesl.entity_embeddings.data_structures.{DocLanguage, ELDocument}
-import edu.umass.cs.iesl.entity_embeddings.embedding.EntityResolver
-import edu.umass.cs.iesl.entity_embeddings.load.LoadWikipediaArticlesCrossWikis
+import edu.umass.cs.iesl.process.MultilingualUniversalSchemaOpts
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
-
-import scala.collection.mutable.ArrayBuffer
 
 /**
  * Created by pv on 3/13/15.

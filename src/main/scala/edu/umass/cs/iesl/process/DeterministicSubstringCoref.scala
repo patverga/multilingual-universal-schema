@@ -10,10 +10,10 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License. */
-package edu.umass.cs.iesl
+package edu.umass.cs.iesl.process
 
 import cc.factorie.app.nlp._
-import cc.factorie.app.nlp.coref.{WithinDocCoref, MentionPhraseFinder, ConllProperNounPhraseFinder}
+import cc.factorie.app.nlp.coref.{ConllProperNounPhraseFinder, MentionPhraseFinder, WithinDocCoref}
 import cc.factorie.app.nlp.phrase.Phrase
 import cc.factorie.app.nlp.pos.PennPosTag
 import edu.umass.cs.iesl.entity_embeddings.data_structures.UnsluggedDocument

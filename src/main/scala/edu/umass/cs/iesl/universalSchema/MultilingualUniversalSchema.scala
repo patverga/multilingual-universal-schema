@@ -1,7 +1,8 @@
-package edu.umass.cs.iesl
+package edu.umass.cs.iesl.universalSchema
+
+import cc.factorie.epistemodb._
 
 import scala.util.Random
-import cc.factorie.epistemodb._
 
 /**
  * Created by beroth on 2/23/15.
