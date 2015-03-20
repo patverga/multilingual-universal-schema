@@ -10,7 +10,7 @@ import scala.io.Source
  * Created by pv on 3/20/15.
  */
 
-object ExactStringFreebaseLink extends ExactStringFreebaseLink("") {
+object ExactStringFreebaseLink extends ExactStringFreebaseLink("/home/pat/data/freebase/test_names") {
 
   override def process(document: Document): Document = {
     val mentions = document.attr[EntityLinks].mentions.toArray
