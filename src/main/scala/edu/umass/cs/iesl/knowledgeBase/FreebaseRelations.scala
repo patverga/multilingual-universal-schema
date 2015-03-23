@@ -58,7 +58,7 @@ object FreebaseRelationsFromMentions extends App
   val printWriter = new PrintWriter(opts.outputFileName.value)
   relations.foreach{case(rel, args) =>
     args.foreach{case(arg1, arg2) =>
-      printWriter.println(s"$arg1\t$arg1\t$rel")
+      printWriter.println(s"$arg1\t$arg1\t$arg2\t$arg2\t$rel\t1.0")
     }
   }
   printWriter.close()
