@@ -49,7 +49,7 @@ object IO
    */
   def file2String(f: File, encoding : String = "UTF-8") //ISO-8859-1")
   : String = {
-    val inputSource = scala.io.Source.fromFile(f, encoding) //UTF-8")
+    val inputSource = scala.io.Source.fromFile(f)//, encoding) //UTF-8")
     val text = inputSource.getLines mkString "\n"
     inputSource.close()
     text
