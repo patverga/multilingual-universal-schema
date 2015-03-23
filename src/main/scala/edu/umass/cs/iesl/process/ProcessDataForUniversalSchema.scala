@@ -25,7 +25,7 @@ object EmbeddingEntityLinkedProcesser extends ProcessDataForUniversalSchema
     val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
 
     val elDocs = IO.loadPlainTextTestData(opts)
-    val result = processELDocs(elDocs, mentionFinder, linker)
+    val result = processELDocs(elDocs, mentionFinder, linker, opts.threads.value.toInt > 1)
 
     println(result)
 
@@ -89,7 +89,7 @@ object ExactStringFreebaseLinkedProcesser extends ProcessDataForUniversalSchema
     val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
 
     val elDocs = IO.loadPlainTextTestData(opts)
-    val result = processELDocs(elDocs, mentionFinder, ExactStringFreebaseLink)
+    val result = processELDocs(elDocs, mentionFinder, ExactStringFreebaseLink, opts.threads.value.toInt > 1)
 
     println(result)
 
@@ -123,9 +123,10 @@ abstract class ProcessDataForUniversalSchema
 {
 
   def processELDocs(elDocs : Seq[ELDocument], mentionFinder: MultilingualNERMentionFinder,
-                    linker : EntityLinker): String = {
+                    linker : EntityLinker, parallel : Boolean = true): String = {
     // load data and process each doc in parallel
-    elDocs.par.zipWithIndex.map { case (elDoc, i) =>
+    val docs = if (parallel) elDocs.par else elDocs
+    docs.zipWithIndex.map { case (elDoc, i) =>
       //      println(s"Processing document $i")
       // Convert to a factorie document
       val fDoc = elDoc.toFactorieDocument
@@ -143,7 +144,8 @@ abstract class ProcessDataForUniversalSchema
 
 
 class MultilingualUniversalSchemaOpts extends EntityEmbeddingOpts{
-  val inputFileName = new CmdOption[String]("input-filename", "inputFileName", "FILENAME", "The filename of the raw text input data.")
-  val inputDirName = new CmdOption[String]("input-directory", "inputDirName", "DIRNAME", "A directory containing different text files.")
-  val outputFileName = new CmdOption[String]("output-filename", "outputFileName", "FILENAME", "File to output results to.")
+  val inputFileName = new CmdOption[String]("input-filename", "", "FILENAME", "The filename of the raw text input data.")
+  val inputDirName = new CmdOption[String]("input-directory", "", "DIRNAME", "A directory containing different text files.")
+  val outputFileName = new CmdOption[String]("output-filename", "", "FILENAME", "File to output results to.")
+  val threads = new CmdOption[String]("threads", "24", "INT", "Number of threads to use.")
 }
