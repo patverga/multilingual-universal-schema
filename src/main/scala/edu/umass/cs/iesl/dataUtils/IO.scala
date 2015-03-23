@@ -47,7 +47,8 @@ object IO
    * @param encoding encoding type, default ISO
    * @return string content of file
    */
-  def file2String(f: File, encoding : String = "ISO-8859-1"): String = {
+  def file2String(f: File, encoding : String = "UTF-8") //ISO-8859-1")
+  : String = {
     val inputSource = scala.io.Source.fromFile(f, encoding) //UTF-8")
     val text = inputSource.getLines mkString "\n"
     inputSource.close()
