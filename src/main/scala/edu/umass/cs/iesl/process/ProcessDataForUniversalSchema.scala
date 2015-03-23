@@ -81,7 +81,8 @@ object EmbeddingEntityLinkedProcesser extends ProcessDataForUniversalSchema
 
 object ExactStringFreebaseLinkedProcesser extends ProcessDataForUniversalSchema
 {
-  
+  val batchSize = 256
+
   def main(args : Array[String]) {
     val opts = new MultilingualUniversalSchemaOpts
     opts.parse(args)
@@ -89,12 +90,15 @@ object ExactStringFreebaseLinkedProcesser extends ProcessDataForUniversalSchema
     val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
 
     val elDocs = IO.loadPlainTextTestData(opts)
-    val result = processELDocs(elDocs, mentionFinder, ExactStringFreebaseLink, opts.threads.value.toInt > 1)
-
-    println(result)
-
-    if (opts.outputFileName.wasInvoked) {
-      IO.exportStringToFile(opts.outputFileName.value, result)
+    var i = 0
+    while (i < elDocs.size) {
+      val batch = elDocs.slice(i, Math.min(i+batchSize, elDocs.size))
+      val result = processELDocs(batch, mentionFinder, ExactStringFreebaseLink, opts.threads.value.toInt > 1)
+      println(result)
+      if (opts.outputFileName.wasInvoked) {
+        IO.exportStringToFile(opts.outputFileName.value, result)
+      }
+      i += batchSize
     }
   }
   
