@@ -1,8 +1,9 @@
 package edu.umass.cs.iesl.dataUtils
 
-import java.io.{File, FileOutputStream, PrintWriter}
+import java.io._
 import edu.umass.cs.iesl.entity_embeddings.data_structures.{Spanish, DocLanguage, ELDocument}
 import edu.umass.cs.iesl.process.MultilingualUniversalSchemaOpts
+import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 
 /**
@@ -47,9 +48,14 @@ object IO
    * @param encoding encoding type, default ISO
    * @return string content of file
    */
-  def file2String(f: File, encoding : String = "UTF-8") //ISO-8859-1")
+  def file2String(f: File, encoding : String = "ISO-8859-1")
   : String = {
-    val inputSource = scala.io.Source.fromFile(f)//, encoding) //UTF-8")
+    val fin = new FileInputStream(f)
+    val bis = new BufferedInputStream(fin)
+    val stream = if (f.getName.endsWith("bz"))
+      new CompressorStreamFactory().createCompressorInputStream(bis)
+    else bis
+    val inputSource = scala.io.Source.fromInputStream(stream, encoding) //UTF-8")
     val text = inputSource.getLines mkString "\n"
     inputSource.close()
     text
