@@ -1,7 +1,7 @@
 package edu.umass.cs.iesl.dataUtils
 
 import java.io.{File, FileOutputStream, PrintWriter}
-import edu.umass.cs.iesl.entity_embeddings.data_structures.{DocLanguage, ELDocument}
+import edu.umass.cs.iesl.entity_embeddings.data_structures.{Spanish, DocLanguage, ELDocument}
 import edu.umass.cs.iesl.process.MultilingualUniversalSchemaOpts
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 
@@ -14,16 +14,15 @@ object IO
   def loadPlainTextTestData(opts : MultilingualUniversalSchemaOpts) : Seq[ELDocument] ={
     // read in input text
     print("Reading in text...")
+    val lang = DocLanguage.fromIsoString(opts.language.value)
     if (opts.inputDirName.wasInvoked){
-      new File(opts.inputDirName.value).listFiles().toSeq.map(f => {
-        ELDocument(f.getName, file2String(f), lang = DocLanguage.fromIsoString(opts.language.value))
-      })
+      subFiles(new File(opts.inputDirName.value), lang)
     }
     else {
       val inputText = if (opts.inputFileName.wasInvoked) {
         file2String(new File(opts.inputFileName.value))
       } // use some example text if input not given
-      else if (opts.language.value == "es")
+      else if (lang == Spanish)
         "La última vez que fui a Boston, que visitó la casa de Paul Revere en Quincy. También visitó la MFA y almorzaba con mi amigo en Harvard."
       else
         "The last time I went to Boston, I visited the home of Paul Revere in Quincy. I also visited the MFA and ate lunch with my friend at Harvard."
@@ -31,8 +30,15 @@ object IO
 
       println("Setting up ElDoc...")
       // Document Representation for Entity linking
-      Seq(ELDocument("test", inputText, lang = DocLanguage.fromIsoString(opts.language.value)))
+      Seq(ELDocument("test", inputText, lang = lang))
     }
+  }
+
+  def subFiles(f : File, lang : DocLanguage) : Seq[ELDocument] = {
+    if (f.isDirectory)
+      f.listFiles().toSeq.flatMap(subFiles(_, lang))
+    else
+      Seq(ELDocument(f.getName, file2String(f), lang = lang))
   }
 
   /**
