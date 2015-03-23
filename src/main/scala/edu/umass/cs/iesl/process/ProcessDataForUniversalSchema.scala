@@ -96,7 +96,7 @@ object ExactStringFreebaseLinkedProcesser extends ProcessDataForUniversalSchema
       val result = processELDocs(batch, mentionFinder, ExactStringFreebaseLink, opts.threads.value.toInt > 1)
       println(result)
       if (opts.outputFileName.wasInvoked) {
-        IO.exportStringToFile(opts.outputFileName.value, result)
+        IO.exportStringToFile(opts.outputFileName.value, result, append=true)
       }
       i += batchSize
     }
