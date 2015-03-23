@@ -27,9 +27,11 @@ object FreebaseRelationsFromMentions extends App
   val mentionSource = scala.io.Source.fromFile(opts.inputFileName.value) //UTF-8")
   mentionSource.getLines().foreach(line => {
     val tuple = line.split("\t")
-    val arg1 = tuple(0)
-    val arg2 = tuple(1)
-    mentionPairs.put(arg1, mentionPairs.getOrElse(arg1, Set[String]()) + arg2)
+    if (tuple.length > 3 ){
+      val arg1 = tuple(1)
+      val arg2 = tuple(3)
+      mentionPairs.put(arg1, mentionPairs.getOrElse(arg1, Set[String]()) + arg2)
+    }
   })
   mentionSource.close()
   //  mentionPairs.foreach{case(arg1, args) =>

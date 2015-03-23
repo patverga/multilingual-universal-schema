@@ -66,7 +66,7 @@ object IO
    * @param outputFile file location as string
    * @param exportString string to export
    * @param append append to existing file - default false
-   * @param compress compres in bzip2 - default false
+   * @param compress compress in bzip2 - default false
    */
   def exportStringToFile(outputFile :String, exportString: String, append : Boolean = false, compress : Boolean = false): Unit = {
     val outputStream = new FileOutputStream(outputFile, append)
