@@ -15,7 +15,7 @@ class TrainTestMultilingualUniversalSchemaOptions extends cc.factorie.util.Defau
   val stepsize = new CmdOption("stepsize", 0.1, "DOUBLE", "step size")
   val maxNorm =  new CmdOption("max-norm", 1.0, "DOUBLE", "maximum l2-norm for vectors")
   val useMaxNorm =  new CmdOption("use-max-norm", true, "BOOLEAN", "whether to use maximum l2-norm for vectors")
-  val prune =  new CmdOption("prune", true, "BOOLEAN", "Prune non largest connected component")
+  val prune =  new CmdOption("prune", false, "BOOLEAN", "Prune non largest connected component")
   val regularizer = new CmdOption("regularizer", 0.01, "DOUBLE", "regularizer")
 }
 
