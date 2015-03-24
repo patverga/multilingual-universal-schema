@@ -28,15 +28,15 @@ object FreebaseRelationsFromMentions extends App
   mentionSource.getLines().foreach(line => {
     val tuple = line.split("\t")
     if (tuple.length > 3 ){
-      val arg1 = tuple(1)
-      val arg2 = tuple(3)
+      val arg1 = tuple(0)
+      val arg2 = tuple(2)
       mentionPairs.put(arg1, mentionPairs.getOrElse(arg1, Set[String]()) + arg2)
     }
   })
   mentionSource.close()
-  mentionPairs.foreach{case(arg1, args) =>
-    args.foreach(arg2 => println(arg1, arg2))
-  }
+//  mentionPairs.foreach{case(arg1, args) =>
+//    args.foreach(arg2 => println(arg1, arg2))
+//  }
 
   // read through freebase dump extracting relations
   val freebaseSource = scala.io.Source.fromFile(opts.freebaseFileName.value) //UTF-8")
@@ -49,7 +49,7 @@ object FreebaseRelationsFromMentions extends App
     if (mentionPairs.contains(arg1)){
       val arg2Set = mentionPairs.getOrElse(arg1, Set())
       if (arg2Set.contains(arg2)){
-        println(s"$arg1\t$arg2")
+//        println(s"$arg1\t$arg2")
         relations.put(rel, relations.getOrElse(rel, ArrayBuffer[(String, String)]()) += ((arg1, arg2)))
       }
     }
