@@ -1,6 +1,7 @@
 package edu.umass.cs.iesl.universalSchema
 
 import cc.factorie.epistemodb._
+import edu.umass.cs.iesl.knowledgeBase.FreebaseRelationsFromMentions
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
@@ -28,11 +29,21 @@ object TrainTestMultilingualUniversalSchema {
   val opts = new TrainTestMultilingualUniversalSchemaOptions
 
   def main(args: Array[String]) : Unit = {
+
     opts.parse(args)
+
+    val inputData = opts.extractedData.value
+    val freebaseFile = if (opts.freebaseData.wasInvoked) opts.freebaseData.value
+    else {
+      val output = inputData.substring(0, inputData.indexOf('.'))+".freebase"
+      FreebaseRelationsFromMentions.exportFreebaseRelations(inputData, output)
+      output
+    }
+    println("Reading in training files.")
 
     val tReadStart = System.currentTimeMillis
     var (kb, testCols) = MultilingualEntityRelationKBMatrix.fromTsv(
-      opts.extractedData.value, opts.freebaseData.value, encoding = opts.encoding.value, colsPerEnt = 1)
+      inputData, freebaseFile, encoding = opts.encoding.value, colsPerEnt = 1)
     if (opts.prune.wasInvoked) kb = kb.prune(2,1)
 
     val tRead = (System.currentTimeMillis - tReadStart)/1000.0
@@ -88,14 +99,24 @@ object TrainTestMultilingualUniversalSchema {
 
 object MultilingualEntityRelationKBMatrix {
 
-  private def entitiesAndRelFromLine(line: String, colsPerEnt:Int): (EntityPair, String, Double) = {
+//  private def entitiesAndRelFromLine(line: String, colsPerEnt:Int): (EntityPair, String, Double) = {
+//    val parts = line.split("\t")
+//    val e1 : String = parts.slice(0, colsPerEnt).mkString("\t")
+//    val e2 : String = parts.slice(colsPerEnt, 2 * colsPerEnt).mkString("\t")
+//    val rel : String = parts.slice(2 * colsPerEnt, parts.length - 1).mkString("\t")
+//    val cellVal : Double = parts(parts.length - 1).toDouble
+//    (EntityPair(e1, e2), rel, cellVal)
+//  }
+
+  private def entitiesAndRelFromLine(line: String, colsPerEnt :Int): (EntityPair, String, Double) = {
     val parts = line.split("\t")
-    val e1 : String = parts.slice(0, colsPerEnt).mkString("\t")
-    val e2 : String = parts.slice(colsPerEnt, 2 * colsPerEnt).mkString("\t")
-    val rel : String = parts.slice(2 * colsPerEnt, parts.length - 1).mkString("\t")
-    val cellVal : Double = parts(parts.length - 1).toDouble
+    val e1 : String = parts(0)
+    val e2 : String = parts(1)
+    val rel : String = parts(2)
+    val cellVal : Double = parts(3).toDouble
     (EntityPair(e1, e2), rel, cellVal)
   }
+
   // Loads a matrix from a tab-separated file
   def fromTsv(filename:String, freebaseFile:String, encoding : String = "UTF-8", colsPerEnt:Int = 2)
   : (EntityRelationKBMatrix, ArrayBuffer[String]) = {
