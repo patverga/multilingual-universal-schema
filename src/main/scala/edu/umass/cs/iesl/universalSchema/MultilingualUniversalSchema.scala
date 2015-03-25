@@ -43,6 +43,7 @@ object TrainTestMultilingualUniversalSchema {
     println("Num Rows:" + kb.numRows())
     println("Num Cols:" + kb.numCols())
     println("Num cells:" + kb.nnz())
+    println("Test Cols:" + testCols.size)
 
     val random = new Random(0)
     val numDev = 0
