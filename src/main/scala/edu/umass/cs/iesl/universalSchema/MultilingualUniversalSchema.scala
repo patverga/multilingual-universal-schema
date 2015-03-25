@@ -2,6 +2,7 @@ package edu.umass.cs.iesl.universalSchema
 
 import cc.factorie.epistemodb._
 
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 /**
@@ -46,7 +47,7 @@ object TrainTestMultilingualUniversalSchema {
     val random = new Random(0)
     val numDev = 0
     val numTest = opts.testCount.value
-    val (trainKb, devKb, testKb) = kb.randomTestSplit(numDev, numTest, None, Some(testCols), random)
+    val (trainKb, devKb, testKb) = kb.randomTestSplit(numDev, numTest, None, Some(testCols.toSet), random)
 
     val model = UniversalSchemaModel.randomModel(kb.numRows(), kb.numCols(), opts.dim.value, random)
 
@@ -97,7 +98,7 @@ object MultilingualEntityRelationKBMatrix {
   }
   // Loads a matrix from a tab-separated file
   def fromTsv(filename:String, freebaseFile:String, encoding : String = "UTF-8", colsPerEnt:Int = 2)
-  : (EntityRelationKBMatrix, Set[String]) = {
+  : (EntityRelationKBMatrix, ArrayBuffer[String]) = {
     val kb = new EntityRelationKBMatrix()
     scala.io.Source.fromFile(filename, encoding).getLines().foreach(line => {
       if (line != "") {
@@ -106,12 +107,12 @@ object MultilingualEntityRelationKBMatrix {
       }
     })
     // get freebase relations as text columns
-    val testCols = Set[String]()
+    val testCols = ArrayBuffer[String]()
     scala.io.Source.fromFile(freebaseFile, encoding).getLines().foreach(line => {
       if (line != "") {
         val (ep, rel, cellVal) = entitiesAndRelFromLine(line, colsPerEnt)
         kb.set(ep, rel, cellVal)
-        testCols.+(rel)
+        testCols += rel
       }
     })
     (kb, testCols)
