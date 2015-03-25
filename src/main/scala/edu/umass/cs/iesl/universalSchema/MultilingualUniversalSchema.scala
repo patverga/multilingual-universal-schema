@@ -100,15 +100,19 @@ object MultilingualEntityRelationKBMatrix {
   : (EntityRelationKBMatrix, Set[String]) = {
     val kb = new EntityRelationKBMatrix()
     scala.io.Source.fromFile(filename, encoding).getLines().foreach(line => {
-      val (ep, rel, cellVal) = entitiesAndRelFromLine(line, colsPerEnt)
-      kb.set(ep, rel, cellVal)
+      if (line != "") {
+        val (ep, rel, cellVal) = entitiesAndRelFromLine(line, colsPerEnt)
+        kb.set(ep, rel, cellVal)
+      }
     })
     // get freebase relations as text columns
     val testCols = Set[String]()
     scala.io.Source.fromFile(freebaseFile, encoding).getLines().foreach(line => {
-      val (ep, rel, cellVal) = entitiesAndRelFromLine(line, colsPerEnt)
-      kb.set(ep, rel, cellVal)
-      testCols.+(rel)
+      if (line != "") {
+        val (ep, rel, cellVal) = entitiesAndRelFromLine(line, colsPerEnt)
+        kb.set(ep, rel, cellVal)
+        testCols.+(rel)
+      }
     })
     (kb, testCols)
   }
