@@ -112,8 +112,8 @@ object MultilingualEntityRelationKBMatrix {
     val parts = line.split("\t")
     val e1 : String = parts(0)
     val e2 : String = parts(1)
-    val rel : String = parts(2)
-    val cellVal : Double = parts(3).toDouble
+    val rel : String = parts.slice(2, parts.length - 1).mkString("\t")
+    val cellVal : Double = parts(parts.length-1).toDouble
     (EntityPair(e1, e2), rel, cellVal)
   }
 

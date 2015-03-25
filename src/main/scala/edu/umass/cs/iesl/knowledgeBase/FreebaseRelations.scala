@@ -36,7 +36,7 @@ object FreebaseRelationsFromMentions
       val tuple = line.split("\t")
       if (tuple.length > 3) {
         val arg1 = tuple(0)
-        val arg2 = tuple(2)
+        val arg2 = if (tuple.length == 6) tuple(2) else tuple(1)
         mentionPairs.put(arg1, mentionPairs.getOrElse(arg1, Set[String]()) + arg2)
       }
     })
@@ -70,8 +70,8 @@ object FreebaseRelationsFromMentions
       }
     }
     printWriter.close()
+    println("Done")
   }
-  println("Done")
 }
 
 class FreebaseProcessingOpts extends CmdOptions{
