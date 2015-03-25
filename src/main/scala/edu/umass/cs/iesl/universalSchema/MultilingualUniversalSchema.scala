@@ -26,8 +26,6 @@ object TrainTestMultilingualUniversalSchema {
 
   val opts = new TrainTestMultilingualUniversalSchemaOptions
 
-//  val testCols = Set("")
-
   def main(args: Array[String]) : Unit = {
     opts.parse(args)
 

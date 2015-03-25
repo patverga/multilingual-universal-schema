@@ -48,7 +48,7 @@ object IO
    * @param encoding encoding type, default ISO
    * @return string content of file
    */
-  def file2String(f: File, encoding : String = "ISO-8859-1")
+  def file2String(f: File, encoding : String = "UTF-8")
   : String = {
     val fin = new FileInputStream(f)
     val bis = new BufferedInputStream(fin)
