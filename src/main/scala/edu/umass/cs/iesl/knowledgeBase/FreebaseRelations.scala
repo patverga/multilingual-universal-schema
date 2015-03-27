@@ -18,7 +18,8 @@ object FreebaseRelationsFromMentions
     assert(opts.inputFileName.wasInvoked, "Must supply mention relation file.")
     assert(opts.outputFileName.wasInvoked, "Must supply output file location.")
 
-    exportFreebaseRelations(opts.inputFileName.value, opts.inputFileName.value, opts.freebaseFileName.value)
+//    exportFreebaseRelations(opts.inputFileName.value, opts.inputFileName.value, opts.freebaseFileName.value)
+    exportDBPediaRelations(opts.inputFileName.value, opts.inputFileName.value)
   }
 
   def exportFreebaseRelations(inputFile:  String, outputFile : String, encoding : String = "ISO-8859-1",
