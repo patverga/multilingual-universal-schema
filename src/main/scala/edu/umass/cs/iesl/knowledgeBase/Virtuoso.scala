@@ -1,9 +1,6 @@
 package edu.umass.cs.iesl.knowledgeBase
 
-import com.hp.hpl.jena.query.QueryExecutionFactory
-import com.hp.hpl.jena.query.QueryFactory
-import com.hp.hpl.jena.query.ResultSetFormatter
-import com.hp.hpl.jena.query.{ResultSetFormatter, QueryFactory, QueryExecutionFactory}
+import com.hp.hpl.jena.query.{QueryExecutionFactory, QueryFactory}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -41,24 +38,25 @@ object Virtuoso
    * @param queryString a valid SPARQL query
    * @return a formated resultset
    */
-  def runQuery(queryString:String): String ={
+  def runQuery(queryString:String): Seq[String] ={
     val query = QueryFactory.create(queryString)
     val qexec = QueryExecutionFactory.sparqlService(endpoint, query)
     val results = qexec.execSelect()
-    val resultStrings = new StringBuilder()
+    val resultStrings = new ArrayBuffer[String]()
     while(results.hasNext) {
+      val path = new StringBuilder()
       val nextResult = results.next()
       val vars = nextResult.varNames()
       while(vars.hasNext) {
-        resultStrings.append(nextResult.get(vars.next()).toString)
-        if (vars.hasNext) resultStrings.append("__")
+        path.append(nextResult.get(vars.next()).toString)
+        if (vars.hasNext) path.append("__")
       }
-      resultStrings.append("\n")
+      resultStrings += path.toString()
     }
 //    val out = ResultSetFormatter.asText(results, query)
 //    qexec.close()
 //    out
-    resultStrings.toString()
+    resultStrings.toSeq
   }
 
   /**
@@ -142,17 +140,17 @@ object Virtuoso
 //      val query1 = constructKnownPathQuery("Lolo_Soetoro", Seq("children", "children"))
 //      println(query1)
 //      val results1 = runQuery(query1)
-//      println(results1)
+//      println(results1.mkString("\n"))
 
 //     2 hop relations between barack obama and his dad
         val query2 = constructAllPathsQuery(stringToDBPediaResource("Lolo_Soetoro"), stringToDBPediaResource("Barack_Obama"), maxHops = 3)
         println(query2)
         val results2 = runQuery(query2)
-        println(results2)
+        println(results2.mkString(s"A\tB\t", s"\t1.0\nA\tB\t", "\t1.0"))
 
 //    val query3 = dbPediaToFreebase("Amsterdam")
 //    println(query3)
 //    val results3 = runQuery(query3)
-//    println(results3)
+//    println(results3.mkString("\n"))
   }
 }
