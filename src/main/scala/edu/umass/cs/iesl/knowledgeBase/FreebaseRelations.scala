@@ -85,8 +85,12 @@ object FreebaseRelationsFromMentions
     mentionSource.getLines().foreach(line => {
       val tuple = line.split("\t")
       if (tuple.length > 3) {
-        val arg1 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${tuple(0).replaceAll("/",".")}>").get
-        val arg2 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>").get
+        val t1 = s"$prefix${tuple(0).replaceAll("/",".")}>"
+        println(t1)
+        val arg1 = FreebaseWikiBiMap.freebase2DBPedia(t1).get
+        val t2 = s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>"
+        println(t2)
+        val arg2 = FreebaseWikiBiMap.freebase2DBPedia(t2).get
 //        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
 //        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
 //        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
