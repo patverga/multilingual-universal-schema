@@ -95,11 +95,13 @@ object Virtuoso
       query.append("\nFILTER(\n")
       for (i <- 0 to maxHops - 2) {
         if (i > 0) query.append(" &&\n")
+        query.append(s"?h$i != sameAs: &&\n")
         query.append(s"?x$i != $start &&\n?x$i != $end")
         for (j <- i + 1 to maxHops - 2) {
           query.append(s" &&\n?x$i != ?x$j")
         }
       }
+      query.append(s"\n&& ?h${maxHops-1} != sameAs:\n")
       query.append(")\n")
     }
     query.append("}")
@@ -128,15 +130,15 @@ object Virtuoso
 //      val results1 = runQuery(query1)
 //      println(results1)
 
-////     2 hop relations between barack obama and his dad
-//        val query2 = constructAllPathsQuery(stringToDBPediaResource("Lolo_Soetoro"), stringToFreebase("m.02mjmr"))
-//        println(query2)
-//        val results2 = runQuery(query2)
-//        println(results2)
+//     2 hop relations between barack obama and his dad
+        val query2 = constructAllPathsQuery(stringToDBPediaResource("Lolo_Soetoro"), stringToDBPediaResource("Barack_Obama"), maxHops = 3)
+        println(query2)
+        val results2 = runQuery(query2)
+        println(results2)
 
-    val query3 = dbPediaToFreebase("Amsterdam")
-    println(query3)
-    val results3 = runQuery(query3)
-    println(results3)
+//    val query3 = dbPediaToFreebase("Amsterdam")
+//    println(query3)
+//    val results3 = runQuery(query3)
+//    println(results3)
   }
 }
