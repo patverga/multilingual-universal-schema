@@ -68,7 +68,7 @@ object Virtuoso
   def constructKnownPathQuery(startEntity : String, relations : Seq[String]): String =
   {
     val query =
-      s"SELECT ?x${relations.size-1} WHERE {" +
+      s"SELECT DISTINCT ?x${relations.size-1} WHERE {" +
         relations.zipWithIndex.map{ case(rel, i) =>
           if(i == 0) s"dbres:$startEntity dbpprop:${relations.head} ?x0 ."
           else s"?x${i-1} dbpprop:$rel ?x$i ."
