@@ -54,8 +54,8 @@ object Virtuoso
       resultStrings += path.toString()
     }
 //    val out = ResultSetFormatter.asText(results, query)
-//    qexec.close()
-//    out
+    //    out
+    qexec.close()
     resultStrings.toSeq
   }
 
