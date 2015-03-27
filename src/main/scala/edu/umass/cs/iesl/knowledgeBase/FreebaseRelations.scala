@@ -85,7 +85,7 @@ object FreebaseRelationsFromMentions
       val tuple = line.split("\t")
       if (tuple.length > 3) {
         val arg1 = tuple(0).replaceAll("/",".")
-        val arg2 = if (tuple.length == 6) tuple(2) else tuple(1)
+        val arg2 = (if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")
 //        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
 //        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
 //        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
