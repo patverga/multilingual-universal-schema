@@ -21,7 +21,7 @@ class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
 
   val s2 = Source.fromFile(f2dbFile)
   val f2db = s2.getLines().map { line =>
-    val Array(dbId, _, fId) = line.split(" ")
+    val Array(dbId, _, fId, _) = line.split(" ")
     (fId, dbId)
   }.toMap
   s2.close()
