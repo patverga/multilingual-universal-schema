@@ -68,15 +68,13 @@ object Virtuoso
 
   /**
    * Constructs a virtuoso sparql query given a starting entity and a path of relations
-   * @param startEntity starting entity
-   * @param endEntity ending entity
+   * @param start starting entity
+   * @param end ending entity
    * @param maxHops maximum length of path between the start and end entities
    * @return constructed query
    */
-  def constructAllPathsQuery(startEntity : String, endEntity : String, maxHops : Int = 2): String =
+  def constructAllPathsQuery(start : String, end : String, maxHops : Int = 2): String =
   {
-    val start = s"dbres:$startEntity"
-    val end = s"dbres:$endEntity"
     val query = new StringBuilder(queryPrefix)
     // select the entity and relation from each hop
     query.append(s"\nSELECT DISTINCT \n${(for (i <- 0 to maxHops-1; line = if (i < maxHops-1)s"?h$i ?x$i" else s"?h$i") yield line).toList.mkString(" ")} WHERE {")
@@ -107,6 +105,14 @@ object Virtuoso
     query.toString()
   }
 
+  def stringToDBPediaResource(input : String) : String ={
+    s"dbres:$input"
+  }
+
+  def stringToFreebase(input : String) : String ={
+    s"<http://rdf.freebase.com/ns/$input>"
+  }
+
   def dbPediaToFreebase(dbPediaID : String): String ={
     val query = "SELECT DISTINCT ?x0 WHERE { \n" +
       s"dbres:$dbPediaID sameAs: ?x0 .\n" +
@@ -115,21 +121,21 @@ object Virtuoso
   }
 
   def main(args : Array[String]): Unit ={
-    // get grand children of barack obamas dad
-    //  val query1 = constructKnownPathQuery("Lolo_Soetoro", Seq("children", "children"))
-    //  println(query1)
-    //  val results1 = runQuery(query1)
-    //  println(results1)
+////     get grand children of barack obamas dad
+//      val query1 = constructKnownPathQuery("Lolo_Soetoro", Seq("children", "children"))
+//      println(query1)
+//      val results1 = runQuery(query1)
+//      println(results1)
 
-    // 2 hop relations between barack obama and his dad
-    //    val query2 = constructAllPathsQuery("Lolo_Soetoro", "Barack_Obama")
-    //    println(query2)
-    //    val results2 = runQuery(query2)
-    //    println(results2)
+//     2 hop relations between barack obama and his dad
+        val query2 = constructAllPathsQuery(stringToDBPediaResource("Lolo_Soetoro"), stringToFreebase("m.02mjmr"))
+        println(query2)
+        val results2 = runQuery(query2)
+        println(results2)
 
-    val query3 = dbPediaToFreebase("Barack_Obama")
-    println(query3)
-    val results3 = runQuery(query3)
-    println(results3)
+//    val query3 = dbPediaToFreebase("Barack_Obama")
+//    println(query3)
+//    val results3 = runQuery(query3)
+//    println(results3)
   }
 }

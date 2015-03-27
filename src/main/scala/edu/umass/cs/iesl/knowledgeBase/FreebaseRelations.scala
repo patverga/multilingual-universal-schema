@@ -86,10 +86,10 @@ object FreebaseRelationsFromMentions
       if (tuple.length > 3) {
         val arg1 = tuple(0)
         val arg2 = if (tuple.length == 6) tuple(2) else tuple(1)
-        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
-        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
-        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
-//        Virtuoso.constructAllPathsQuery(arg1Wiki, arg2Wiki)
+//        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
+//        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
+//        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
+        Virtuoso.constructAllPathsQuery(Virtuoso.stringToFreebase(arg1), Virtuoso.stringToFreebase(arg2))
 //        printWriter.println(s"$arg1\t$arg2\t$rel\t1.0")
 
       }
