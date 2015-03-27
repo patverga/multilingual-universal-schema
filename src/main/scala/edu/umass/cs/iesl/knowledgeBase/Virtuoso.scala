@@ -56,7 +56,7 @@ object Virtuoso
 //    val out = ResultSetFormatter.asText(results, query)
     //    out
     qexec.close()
-    resultStrings.toSeq
+    resultStrings.toSet.toSeq
   }
 
   /**
