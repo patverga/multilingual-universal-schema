@@ -87,15 +87,12 @@ object FreebaseRelationsFromMentions
       if (tuple.length > 3) {
         val arg1 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${tuple(0).replaceAll("/",".")}>")
         val arg2 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>")
-//        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
-//        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
-//        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
-        if (arg1.isDefined && arg2.isDefined) {
+        if (arg1.isDefined && arg2.isDefined && arg1 != arg2) {
           for (i <- 1 to 3) {
             val query = Virtuoso.constructAllPathsQuery(arg1.get, arg2.get, maxHops = i, freebase = false)
             val path = Virtuoso.runQuery(query)
-            println(query)
-            println(path)
+//            println(query)
+            println(s"$arg1\t$path$arg2")
             printWriter.println(s"$arg1\t$arg2\t$path\t1.0")
           }
         }
