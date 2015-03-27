@@ -19,7 +19,7 @@ class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
 
   val f2db = Source.fromFile(f2dbFile).getLines().map { line =>
     val Array(fId, _, dbID) = line.split("\t")
-    (FreebaseId(fId), DBPediaId(dbID))
+    (fId, dbID)
   }.toMap
 
   val db2f = f2db.map(_.swap)
@@ -28,9 +28,9 @@ class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
 
   def apply(wId:WikipediaId):Option[(FreebaseId)] = w2f.get(wId)
 
-  def apply(dbId:DBPediaId):Option[(FreebaseId)] = db2f.get(dbId)
+//  def apply(dbId:DBPediaId):Option[(FreebaseId)] = db2f.get(dbId)
 
-  def freebase2DBPedia(fId:FreebaseId):Option[(DBPediaId)] = f2db.get(fId)
+  def freebase2DBPedia(fId:String):Option[(String)] = f2db.get(fId)
 }
 object FreebaseWikiBiMap extends FreebaseWikiBiMap(
   new File("/iesl/canvas/beroth/tac/data/freebase_to_wiki_types.tsv"),
