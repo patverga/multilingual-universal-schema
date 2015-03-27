@@ -87,7 +87,7 @@ object FreebaseRelationsFromMentions
       if (tuple.length > 3) {
         val dbId1 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${tuple(0).replaceAll("/",".")}>")
         val dbId2 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>")
-        if (dbId1.isDefined && dbId1.isDefined) {
+        if (dbId1 != None && dbId1 != None) {
           val arg1 = dbId1.get
           val arg2 = dbId2.get
           for (i <- 1 to 3) {
