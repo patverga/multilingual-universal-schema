@@ -93,10 +93,10 @@ object FreebaseRelationsFromMentions
         if (arg1.isDefined && arg2.isDefined) {
           for (i <- 1 to 3) {
             val query = Virtuoso.constructAllPathsQuery(arg1.get, arg2.get, maxHops = i, freebase = false)
-            val result = Virtuoso.runQuery(query)
+            val path = Virtuoso.runQuery(query)
             println(query)
-            println(result)
-            //        printWriter.println(s"$arg1\t$arg2\t$rel\t1.0")
+            println(path)
+            printWriter.println(s"$arg1\t$arg2\t$path\t1.0")
           }
         }
       }

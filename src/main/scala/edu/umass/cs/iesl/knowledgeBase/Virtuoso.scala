@@ -5,6 +5,9 @@ import com.hp.hpl.jena.query.QueryFactory
 import com.hp.hpl.jena.query.ResultSetFormatter
 import com.hp.hpl.jena.query.{ResultSetFormatter, QueryFactory, QueryExecutionFactory}
 
+import scala.collection.mutable.ArrayBuffer
+
+
 object Virtuoso
 {
 
@@ -42,9 +45,20 @@ object Virtuoso
     val query = QueryFactory.create(queryString)
     val qexec = QueryExecutionFactory.sparqlService(endpoint, query)
     val results = qexec.execSelect()
-    val out = ResultSetFormatter.asText(results, query)
-    qexec.close()
-    out
+    val resultStrings = new StringBuilder()
+    while(results.hasNext) {
+      val nextResult = results.next()
+      val vars = nextResult.varNames()
+      while(vars.hasNext) {
+        resultStrings.append(nextResult.get(vars.next()).toString)
+        if (vars.hasNext) resultStrings.append("__")
+      }
+      resultStrings.append("\n")
+    }
+//    val out = ResultSetFormatter.asText(results, query)
+//    qexec.close()
+//    out
+    resultStrings.toString()
   }
 
   /**
@@ -73,11 +87,11 @@ object Virtuoso
    * @param maxHops maximum length of path between the start and end entities
    * @return constructed query
    */
-  def constructAllPathsQuery(start : String, end : String, maxHops : Int = 2, freebase:Boolean = false): String =
+  def constructAllPathsQuery(start : String, end : String, maxHops : Int = 2, freebase:Boolean = false, printEntities:Boolean = false): String =
   {
     val query = new StringBuilder(queryPrefix)
     // select the entity and relation from each hop
-    query.append(s"\nSELECT DISTINCT \n${(for (i <- 0 to maxHops-1; line = if (i < maxHops-1)s"?h$i ?x$i" else s"?h$i") yield line).toList.mkString(" ")} WHERE {")
+    query.append(s"\nSELECT DISTINCT \n${(for (i <- 0 to maxHops-1; line = if (i < maxHops-1 && printEntities)s"?h$i ?x$i" else s"?h$i") yield line).toList.mkString(" ")} WHERE {")
     // simple 1 hop query
     if (maxHops == 1)
       query.append(s"\n$start ?h0 $end .\n")
