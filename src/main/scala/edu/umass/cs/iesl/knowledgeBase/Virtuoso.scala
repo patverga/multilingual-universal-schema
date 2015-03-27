@@ -128,15 +128,15 @@ object Virtuoso
 //      val results1 = runQuery(query1)
 //      println(results1)
 
-//     2 hop relations between barack obama and his dad
-        val query2 = constructAllPathsQuery(stringToDBPediaResource("Lolo_Soetoro"), stringToFreebase("m.02mjmr"))
-        println(query2)
-        val results2 = runQuery(query2)
-        println(results2)
+////     2 hop relations between barack obama and his dad
+//        val query2 = constructAllPathsQuery(stringToDBPediaResource("Lolo_Soetoro"), stringToFreebase("m.02mjmr"))
+//        println(query2)
+//        val results2 = runQuery(query2)
+//        println(results2)
 
-//    val query3 = dbPediaToFreebase("Barack_Obama")
-//    println(query3)
-//    val results3 = runQuery(query3)
-//    println(results3)
+    val query3 = dbPediaToFreebase("Amsterdam")
+    println(query3)
+    val results3 = runQuery(query3)
+    println(results3)
   }
 }

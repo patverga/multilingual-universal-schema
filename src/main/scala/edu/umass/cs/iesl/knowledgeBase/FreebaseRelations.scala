@@ -77,6 +77,7 @@ object FreebaseRelationsFromMentions
   def exportDBPediaRelations(inputFile:  String, outputFile : String, encoding : String = "ISO-8859-1"): Unit = {
 
     print(s"Exporting freebase relations for mentions in $inputFile... ")
+    val prefix = "<http://rdf.freebase.com/ns/"
     val printWriter = new PrintWriter(outputFile)
 
     // read in input mentions extracted from text
@@ -84,17 +85,16 @@ object FreebaseRelationsFromMentions
     mentionSource.getLines().foreach(line => {
       val tuple = line.split("\t")
       if (tuple.length > 3) {
-        val arg1 = tuple(0).replaceAll("/",".")
-        val arg2 = (if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")
+        val arg1 = s"$prefix${tuple(0).replaceAll("/",".")}>"
+        val arg2 = s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>"
 //        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
 //        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
 //        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
-        val query = Virtuoso.constructAllPathsQuery(Virtuoso.stringToFreebase(arg1), Virtuoso.stringToFreebase(arg2), maxHops = 4, freebase = true)
+        val query = Virtuoso.constructAllPathsQuery(arg1, arg2, maxHops = 4, freebase = true)
         val result = Virtuoso.runQuery(query)
         println(query)
         println(result)
 //        printWriter.println(s"$arg1\t$arg2\t$rel\t1.0")
-
       }
     })
     mentionSource.close()
