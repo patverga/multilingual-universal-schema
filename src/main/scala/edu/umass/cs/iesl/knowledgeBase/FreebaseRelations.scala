@@ -85,15 +85,19 @@ object FreebaseRelationsFromMentions
     mentionSource.getLines().foreach(line => {
       val tuple = line.split("\t")
       if (tuple.length > 3) {
-        val arg1 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${tuple(0).replaceAll("/",".")}>")
-        val arg2 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>")
-        if (arg1.isDefined && arg2.isDefined && arg1 != arg2) {
+        val dbId1 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${tuple(0).replaceAll("/",".")}>")
+        val dbId2 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>")
+        if (dbId1.isDefined && dbId1.isDefined && dbId1 != dbId1) {
           for (i <- 1 to 3) {
-            val query = Virtuoso.constructAllPathsQuery(arg1.get, arg2.get, maxHops = i, freebase = false)
+            val arg1 = dbId1.get
+            val arg2 = dbId2.get
+            val query = Virtuoso.constructAllPathsQuery(arg1, arg2, maxHops = i, freebase = false)
             val path = Virtuoso.runQuery(query)
 //            println(query)
-            println(s"$arg1\t$path$arg2")
-            printWriter.println(s"$arg1\t$arg2\t$path\t1.0")
+            if (!path.isEmpty) {
+              println(s"$arg1\t$path$arg2")
+              printWriter.println(s"$arg1\t$arg2\t$path\t1.0")
+            }
           }
         }
       }
