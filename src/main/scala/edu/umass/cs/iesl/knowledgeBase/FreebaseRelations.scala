@@ -89,7 +89,7 @@ object FreebaseRelationsFromMentions
 //        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
 //        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
 //        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
-        val query = Virtuoso.constructAllPathsQuery(Virtuoso.stringToFreebase(arg1), Virtuoso.stringToFreebase(arg2))
+        val query = Virtuoso.constructAllPathsQuery(Virtuoso.stringToFreebase(arg1), Virtuoso.stringToFreebase(arg2), maxHops = 4)
         val result = Virtuoso.runQuery(query)
         println(query)
         println(result)
