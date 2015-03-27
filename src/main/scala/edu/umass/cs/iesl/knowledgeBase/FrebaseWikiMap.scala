@@ -10,17 +10,21 @@ import scala.io.Source
 
 class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
 
-  val f2w = Source.fromFile(f2wFile).getLines().map { line =>
+  val s1 = Source.fromFile(f2wFile)
+  val f2w = s1.getLines().map { line =>
     val Array(fId, wId, _) = line.split("\t")
     (FreebaseId(fId), WikipediaId(wId))
   }.toMap
+  s1.close()
 
   val w2f = f2w.map(_.swap)
 
-  val f2db = Source.fromFile(f2dbFile).getLines().map { line =>
-    val Array(fId, _, dbID) = line.split(" ")
-    (fId, dbID)
+  val s2 = Source.fromFile(f2dbFile)
+  val f2db = s2.getLines().map { line =>
+    val Array(dbId, _, fId) = line.split(" ")
+    (fId, dbId)
   }.toMap
+  s2.close()
 
   val db2f = f2db.map(_.swap)
 
