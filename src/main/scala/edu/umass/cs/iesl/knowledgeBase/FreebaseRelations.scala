@@ -94,11 +94,11 @@ object FreebaseRelationsFromMentions
             val query = Virtuoso.constructAllPathsQuery(arg1, arg2, maxHops = i, freebase = false)
             val paths = Virtuoso.runQuery(query)
 //            println(query)
-//            if (paths.nonEmpty) {
+            if (paths.nonEmpty) {
               val pathString = paths.mkString(s"$arg1\t$arg2\t", s"\t1.0\n$arg1\t$arg2\t", "\t1.0")
               println(pathString)
               printWriter.println(pathString)
-//            }
+            }
           }
         }
       }
