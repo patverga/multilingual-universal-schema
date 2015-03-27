@@ -73,7 +73,7 @@ object Virtuoso
    * @param maxHops maximum length of path between the start and end entities
    * @return constructed query
    */
-  def constructAllPathsQuery(start : String, end : String, maxHops : Int = 2): String =
+  def constructAllPathsQuery(start : String, end : String, maxHops : Int = 2, freebase:Boolean = false): String =
   {
     val query = new StringBuilder(queryPrefix)
     // select the entity and relation from each hop
@@ -85,7 +85,8 @@ object Virtuoso
     {
       // create the query for the actual hops
       query.append((for (i <- 0 to maxHops-1;
-                         line = if(i == 0) s"$start ?h0 ?x0 ."
+                         line = if(i == 0 && freebase) s"?x0 ?h0 $start ."
+                           else if(i == 0 && !freebase) s"$start ?h0 ?x0 ."
                          else if(i == maxHops-1) s"?x${i-1} ?h$i $end ."
                          else s"?x${i-1} ?h$i ?x$i .") yield line
         ).mkString("\n", "\n", "\n")
