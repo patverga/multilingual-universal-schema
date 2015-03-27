@@ -72,7 +72,35 @@ object FreebaseRelationsFromMentions
     printWriter.close()
     println("Done")
   }
+
+  def exportDBPediaRelations(inputFile:  String, outputFile : String, encoding : String = "ISO-8859-1"): Unit = {
+
+    print(s"Exporting freebase relations for mentions in $inputFile... ")
+    val printWriter = new PrintWriter(outputFile)
+
+    // read in input mentions extracted from text
+    val mentionSource = scala.io.Source.fromFile(inputFile, encoding) //UTF-8")
+    mentionSource.getLines().foreach(line => {
+      val tuple = line.split("\t")
+      if (tuple.length > 3) {
+        val arg1 = tuple(0)
+        val arg2 = if (tuple.length == 6) tuple(2) else tuple(1)
+        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
+        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
+        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
+//        Virtuoso.constructAllPathsQuery(arg1Wiki, arg2Wiki)
+//        printWriter.println(s"$arg1\t$arg2\t$rel\t1.0")
+
+      }
+    })
+    mentionSource.close()
+
+    printWriter.close()
+    println("Done")
+  }
 }
+
+
 
 class FreebaseProcessingOpts extends CmdOptions{
   val inputFileName = new CmdOption[String]("relation-filename", "", "FILENAME", "File containing preprocessed entity relation tuples in Universal schema tsv format.")

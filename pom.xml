@@ -136,6 +136,11 @@
             <type>jar</type>
             <version>3.6.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-arq</artifactId>
+            <version>2.13.0</version>
+        </dependency>
 
 	</dependencies>
 
