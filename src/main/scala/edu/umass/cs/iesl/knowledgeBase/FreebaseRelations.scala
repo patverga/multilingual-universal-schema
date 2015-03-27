@@ -85,12 +85,12 @@ object FreebaseRelationsFromMentions
     mentionSource.getLines().foreach(line => {
       val tuple = line.split("\t")
       if (tuple.length > 3) {
-        val arg1 = s"$prefix${tuple(0).replaceAll("/",".")}>"
-        val arg2 = s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>"
+        val arg1 = FreebaseWikiBiMap.freebase2DBPedia(FreebaseId(s"$prefix${tuple(0).replaceAll("/",".")}>")).toString
+        val arg2 = FreebaseWikiBiMap.freebase2DBPedia(FreebaseId(s"$prefix${(if (tuple.length == 6) tuple(2) else tuple(1)).replaceAll("/",".")}>")).toString
 //        val arg1Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg1))
 //        val arg2Wiki = FreebaseWikiBiMap.f2w(FreebaseId(arg2))
 //        println(arg1Wiki.toString + "\t" + arg2Wiki.toString)
-        val query = Virtuoso.constructAllPathsQuery(arg1, arg2, maxHops = 4, freebase = true)
+        val query = Virtuoso.constructAllPathsQuery(arg1, arg2, maxHops = 4, freebase = false)
         val result = Virtuoso.runQuery(query)
         println(query)
         println(result)
