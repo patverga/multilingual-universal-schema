@@ -1,14 +1,19 @@
 package edu.umass.cs.iesl.knowledgeBase
 
+import java.net.URI
+
 import com.hp.hpl.jena.query.{QueryExecutionFactory, QueryFactory}
+import org.apache.jena.atlas.web.auth.{ScopedAuthenticator, PreemptiveBasicAuthenticator}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
 
 
 object Virtuoso
 {
 
   val endpoint = "http://dbpedia.org/sparql"
+//  val endpoint = "http://ernst.cs.umass.edu:8890/sparql"
   val queryPrefix =
     "PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>\n" +
       "PREFIX dbpprop: <http://dbpedia.org/property/>\n" +
@@ -19,7 +24,7 @@ object Virtuoso
    * pointless test method
    */
   def checkServiceTest() {
-    val query = "ASK { }";
+    val query = "ASK { }"
     val qe = QueryExecutionFactory.sparqlService(endpoint, query)
     try {
       if (qe.execAsk()) {
@@ -39,24 +44,28 @@ object Virtuoso
    * @return a formated resultset
    */
   def runQuery(queryString:String): Seq[String] ={
-    val query = QueryFactory.create(queryString)
-    val qexec = QueryExecutionFactory.sparqlService(endpoint, query)
-    val results = qexec.execSelect()
     val resultStrings = new ArrayBuffer[String]()
-    while(results.hasNext) {
-      val path = new StringBuilder()
-      val nextResult = results.next()
-      val vars = nextResult.varNames()
-      while(vars.hasNext) {
-        path.append(nextResult.get(vars.next()).toString)
-        if (vars.hasNext) path.append("__")
+    try {
+      val query = QueryFactory.create(queryString)
+      val qexec = QueryExecutionFactory.sparqlService(endpoint, query)
+      val results = qexec.execSelect()
+      while (results.hasNext) {
+        val path = new StringBuilder()
+        val nextResult = results.next()
+        val vars = nextResult.varNames()
+        while (vars.hasNext) {
+          path.append(nextResult.get(vars.next()).toString)
+          if (vars.hasNext) path.append("__")
+        }
+        resultStrings += path.toString()
       }
-      resultStrings += path.toString()
+      //    val out = ResultSetFormatter.asText(results, query)
+      //    out
+      qexec.close()
+    } catch{
+      case e : Exception => {println(e.getMessage)}
     }
-//    val out = ResultSetFormatter.asText(results, query)
-    //    out
-    qexec.close()
-    resultStrings.toSet.toSeq
+    resultStrings.toSeq
   }
 
   /**
