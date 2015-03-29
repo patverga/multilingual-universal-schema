@@ -84,7 +84,7 @@ object FreebaseRelationsFromMentions
     val mentionSource = scala.io.Source.fromFile(inputFile, encoding) //UTF-8")
     mentionSource.getLines().foreach(line => {
       val tuple = line.split("\t")
-      if (tuple.length > 3) {
+      if (tuple.length > 1) {
         val fbId1 = tuple(0)
         val fbId2 = if (tuple.length == 6) tuple(2) else tuple(1)
         val dbId1 = FreebaseWikiBiMap.freebase2DBPedia(s"$prefix${fbId1.replaceAll("/",".")}>")
