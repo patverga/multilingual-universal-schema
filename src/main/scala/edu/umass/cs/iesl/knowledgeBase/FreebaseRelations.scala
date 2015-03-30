@@ -20,10 +20,7 @@ object FreebaseRelationsFromMentions
 
     opts.knowledgeBase.value match {
       case "dbpedia" => exportDBPediaRelations(opts.inputFileName.value, opts.outputFileName.value, maxHops = opts.maxHops.value.toInt)
-      case "freebase" => {
-        assert(opts.freebaseFileName.wasInvoked, "Must supply freebase file location.")
-        exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, opts.freebaseFileName.value)
-      }
+      case "freebase" => exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, "UTF-8", opts.freebaseFileName.value
     }
   }
 
