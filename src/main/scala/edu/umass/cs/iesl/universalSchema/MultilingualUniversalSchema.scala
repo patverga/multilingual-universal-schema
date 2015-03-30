@@ -134,6 +134,7 @@ object MultilingualEntityRelationKBMatrix {
         val (ep, rel, cellVal) = entitiesAndRelFromLine(line, colsPerEnt)
         kb.set(ep, rel, cellVal)
         testCols += rel
+        println(rel)
       }
     })
     (kb, testCols)

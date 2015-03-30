@@ -25,7 +25,8 @@ object FreebaseRelationsFromMentions
   }
 
   def exportFreebaseRelations(inputFile:  String, outputFile : String, encoding : String = "ISO-8859-1",
-                              freebaseFile : String = "/iesl/canvas/pat/data/freebase/freebase-two-entities.formated"): Unit = {
+                              freebaseFile : String = "/iesl/canvas/pat/data/freebase/freebase-two-entities.formated")
+  : Unit = {
 
     print(s"Exporting freebase relations for mentions in $inputFile... ")
     // mention pairings we saw in the text
