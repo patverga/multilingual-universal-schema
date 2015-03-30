@@ -121,7 +121,7 @@ object FreebaseRelationsFromMentions
 
 
 class FreebaseProcessingOpts extends CmdOptions{
-  val inputFileName = new CmdOption[String]("relation-filename", "", "FILENAME", "File containing preprocessed entity relation tuples in Universal schema tsv format.")
+  val inputFileName = new CmdOption[String]("input-filename", "", "FILENAME", "File containing preprocessed entity relation tuples in Universal schema tsv format.")
   val freebaseFileName = new CmdOption[String]("freebase-filename", "/iesl/canvas/pat/data/freebase/freebase-two-entities.formated", "FILENAME", "File of preprocessed freebase dump in tsv form (fid1 relation fid2)")
   val outputFileName = new CmdOption[String]("output-filename", "", "FILENAME", "File to output extracted freebase relations from.")
   val maxHops = new CmdOption[String]("max-hops", "3", "INT", "Max hops between relations in dbpedia.")
