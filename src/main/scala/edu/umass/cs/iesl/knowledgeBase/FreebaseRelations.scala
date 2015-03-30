@@ -18,8 +18,13 @@ object FreebaseRelationsFromMentions
     assert(opts.inputFileName.wasInvoked, "Must supply mention relation file.")
     assert(opts.outputFileName.wasInvoked, "Must supply output file location.")
 
-//    exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, opts.freebaseFileName.value)
-    exportDBPediaRelations(opts.inputFileName.value, opts.outputFileName.value)
+    opts.knowledgeBase.value match {
+      case "dbpedia" => exportDBPediaRelations(opts.inputFileName.value, opts.outputFileName.value, maxHops = opts.maxHops.value.toInt)
+      case "freebase" => {
+        assert(opts.freebaseFileName.wasInvoked, "Must supply freebase file location.")
+        exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, opts.freebaseFileName.value)
+      }
+    }
   }
 
   def exportFreebaseRelations(inputFile:  String, outputFile : String, encoding : String = "ISO-8859-1",
@@ -74,7 +79,8 @@ object FreebaseRelationsFromMentions
     println("Done")
   }
 
-  def exportDBPediaRelations(inputFile:  String, outputFile : String, encoding : String = "ISO-8859-1"): Unit = {
+  def exportDBPediaRelations(inputFile:  String, outputFile : String, encoding : String = "ISO-8859-1", maxHops : Int = 3)
+  : Unit = {
 
     print(s"Exporting freebase relations for mentions in $inputFile... ")
     val prefix = "<http://rdf.freebase.com/ns/"
@@ -92,7 +98,7 @@ object FreebaseRelationsFromMentions
         if (dbId1.isDefined && dbId2.isDefined) {
           val arg1 = dbId1.get
           val arg2 = dbId2.get
-          for (i <- 1 to 3) {
+          for (i <- 1 to maxHops) {
             val query = Virtuoso.constructAllPathsQuery(arg1, arg2, maxHops = i, freebase = false)
             val paths = Virtuoso.runQuery(query)
 //            println(query)
@@ -118,4 +124,7 @@ class FreebaseProcessingOpts extends CmdOptions{
   val inputFileName = new CmdOption[String]("relation-filename", "", "FILENAME", "File containing preprocessed entity relation tuples in Universal schema tsv format.")
   val freebaseFileName = new CmdOption[String]("freebase-filename", "/iesl/canvas/pat/data/freebase/freebase-two-entities.formated", "FILENAME", "File of preprocessed freebase dump in tsv form (fid1 relation fid2)")
   val outputFileName = new CmdOption[String]("output-filename", "", "FILENAME", "File to output extracted freebase relations from.")
+  val maxHops = new CmdOption[String]("max-hops", "3", "INT", "Max hops between relations in dbpedia.")
+  val knowledgeBase = new CmdOption[String]("knowlege-base", "dbpedia", "STRING", "which knowledge base to export from " +
+    "(dbpedia or freebase)")
 }
