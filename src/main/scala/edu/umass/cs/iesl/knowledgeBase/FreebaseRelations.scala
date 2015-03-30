@@ -125,6 +125,6 @@ class FreebaseProcessingOpts extends CmdOptions{
   val freebaseFileName = new CmdOption[String]("freebase-filename", "/iesl/canvas/pat/data/freebase/freebase-two-entities.formated", "FILENAME", "File of preprocessed freebase dump in tsv form (fid1 relation fid2)")
   val outputFileName = new CmdOption[String]("output-filename", "", "FILENAME", "File to output extracted freebase relations from.")
   val maxHops = new CmdOption[String]("max-hops", "3", "INT", "Max hops between relations in dbpedia.")
-  val knowledgeBase = new CmdOption[String]("knowlege-base", "dbpedia", "STRING", "which knowledge base to export from " +
+  val knowledgeBase = new CmdOption[String]("knowledge-base", "dbpedia", "STRING", "which knowledge base to export from " +
     "(dbpedia or freebase)")
 }
