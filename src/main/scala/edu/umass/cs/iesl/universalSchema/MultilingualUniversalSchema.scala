@@ -58,7 +58,7 @@ object TrainTestMultilingualUniversalSchema {
     val random = new Random(0)
     val numDev = 0
     val numTest = opts.testCount.value
-    val (trainKb, devKb, testKb) = kb.randomTestSplit(numDev, numTest, None, Some(testCols.toSet), random)
+    val (trainKb, devKb, testKb) = kb.randomTestSplit(numDev, numTest, None, Some(testCols), random)
 
     val model = UniversalSchemaModel.randomModel(kb.numRows(), kb.numCols(), opts.dim.value, random)
 
@@ -119,7 +119,7 @@ object MultilingualEntityRelationKBMatrix {
 
   // Loads a matrix from a tab-separated file
   def fromTsv(filename:String, freebaseFile:String, encoding : String = "UTF-8", colsPerEnt:Int = 2)
-  : (EntityRelationKBMatrix, ArrayBuffer[String]) = {
+  : (EntityRelationKBMatrix, Set[String]) = {
     val kb = new EntityRelationKBMatrix()
     scala.io.Source.fromFile(filename, encoding).getLines().foreach(line => {
       if (line != "") {
@@ -134,9 +134,8 @@ object MultilingualEntityRelationKBMatrix {
         val (ep, rel, cellVal) = entitiesAndRelFromLine(line, colsPerEnt)
         kb.set(ep, rel, cellVal)
         testCols += rel
-        println(rel)
       }
     })
-    (kb, testCols)
+    (kb, testCols.toSet)
   }
 }
