@@ -20,7 +20,7 @@ object FreebaseRelationsFromMentions
 
     opts.knowledgeBase.value match {
       case "dbpedia" => exportDBPediaRelations(opts.inputFileName.value, opts.outputFileName.value, maxHops = opts.maxHops.value.toInt)
-      case "freebase" => exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, "UTF-8", opts.freebaseFileName.value)
+      case "freebase" => exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, opts.freebaseFileName.value)
     }
   }
 
@@ -34,7 +34,7 @@ object FreebaseRelationsFromMentions
     val relations = new mutable.HashMap[String, ArrayBuffer[(String, String)]]
 
     // read in input mentions extracted from text
-    val mentionSource = scala.io.Source.fromFile(inputFile, encoding) //UTF-8")
+    val mentionSource = scala.io.Source.fromFile(inputFile, "UTF-8")
     mentionSource.getLines().foreach(line => {
       val tuple = line.split("\t")
       if (tuple.length > 3) {
