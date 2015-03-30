@@ -22,7 +22,7 @@ object FreebaseRelationsFromMentions
       case "dbpedia" => exportDBPediaRelations(opts.inputFileName.value, opts.outputFileName.value, maxHops = opts.maxHops.value.toInt)
       case "freebase" => {
         assert(opts.freebaseFileName.wasInvoked, "Must supply freebase file location.")
-        exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, opts.freebaseFileName.value)
+        exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, opts.freebaseFileName.value, encoding="UTF-8")
       }
     }
   }
