@@ -34,7 +34,7 @@ object FreebaseRelationsFromMentions
     val relations = new mutable.HashMap[String, ArrayBuffer[(String, String)]]
 
     // read in input mentions extracted from text
-    val mentionSource = scala.io.Source.fromFile(inputFile, "UTF-8")
+    val mentionSource = scala.io.Source.fromFile(inputFile, "ISO-8859-1")
     mentionSource.getLines().foreach(line => {
       val tuple = line.split("\t")
       if (tuple.length > 3) {
