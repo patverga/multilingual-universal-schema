@@ -26,9 +26,9 @@ train_relations_set = set([line.split('\t')[1] for line in splits[0]])
 for i in range(1, 3):
     not_in_train = {line.split('\t')[1]: line for line in splits[i] if line.split('\t')[1] not in train_relations_set}
     train_relations_set.update(not_in_train.keys())
-    not_in_train_set = set(not_in_train.values())
-    splits[i] = [line for line in splits[i] if line not in not_in_train_set]
-    splits[0] += [line for line in splits[i] if line in not_in_train_set]
+    not_in_train_set = set(not_in_train.keys())
+    splits[i] = [line for line in splits[i] if line.split('\t')[1] not in not_in_train_set]
+    splits[0] += [line for line in splits[i] if line.split('\t')[1] in not_in_train_set]
 
 print(len(splits[0]), len(splits[1]), len(splits[2]))
 
