@@ -19,7 +19,8 @@ object FreebaseRelationsFromMentions
     assert(opts.outputFileName.wasInvoked, "Must supply output file location.")
 
     opts.knowledgeBase.value match {
-      case "dbpedia" => exportDBPediaRelations(opts.inputFileName.value, opts.outputFileName.value, maxHops = opts.maxHops.value.toInt)
+      case "dbpedia" => exportDBPediaRelations(opts.inputFileName.value, opts.outputFileName.value,
+        encoding = opts.encoding.value,maxHops = opts.maxHops.value.toInt)
       case "freebase" => exportFreebaseRelations(opts.inputFileName.value, opts.outputFileName.value, opts.freebaseFileName.value)
     }
   }
@@ -35,7 +36,7 @@ object FreebaseRelationsFromMentions
     val relations = new mutable.HashMap[String, ArrayBuffer[(String, String)]]
 
     // read in input mentions extracted from text
-    val mentionSource = scala.io.Source.fromFile(inputFile, "ISO-8859-1")
+    val mentionSource = scala.io.Source.fromFile(inputFile, encoding)
     mentionSource.getLines().foreach(line => {
       val tuple = line.split("\t")
       if (tuple.length > 3) {
@@ -123,6 +124,7 @@ class FreebaseProcessingOpts extends CmdOptions{
   val freebaseFileName = new CmdOption[String]("freebase-filename", "/iesl/canvas/pat/data/freebase/freebase-two-entities.formated", "FILENAME", "File of preprocessed freebase dump in tsv form (fid1 relation fid2)")
   val outputFileName = new CmdOption[String]("output-filename", "", "FILENAME", "File to output extracted freebase relations from.")
   val maxHops = new CmdOption[String]("max-hops", "3", "INT", "Max hops between relations in dbpedia.")
+  val encoding = new CmdOption[String]("encoding", "ISO-8859-1", "String", "Encoding to use.")
   val knowledgeBase = new CmdOption[String]("knowledge-base", "dbpedia", "STRING", "which knowledge base to export from " +
     "(dbpedia or freebase)")
 }
