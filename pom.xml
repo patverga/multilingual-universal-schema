@@ -166,7 +166,7 @@
 			</plugin>
 
 
-                     Assembles the jar and other release formats (tarball, etc.).
+                     <!--Assembles the jar and other release formats (tarball, etc.).-->
                     <plugin>
                       <artifactId>maven-assembly-plugin</artifactId>
                       <version>2.4</version>
