@@ -1,19 +1,15 @@
 package edu.umass.cs.iesl.knowledgeBase
 
-import java.net.URI
-
 import com.hp.hpl.jena.query.{QueryExecutionFactory, QueryFactory}
-import org.apache.jena.atlas.web.auth.{ScopedAuthenticator, PreemptiveBasicAuthenticator}
 
 import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 
 
 object Virtuoso
 {
 
 //  val endpoint = "http://dbpedia.org/sparql"
-  val endpoint = "localhost:8890/sparql"
+  val endpoint = "http://ernst.cs.umass.edu:8890/sparql"
   val queryPrefix =
     "PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>\n" +
       "PREFIX dbpprop: <http://dbpedia.org/property/>\n" +
@@ -146,20 +142,32 @@ object Virtuoso
 
   def main(args : Array[String]): Unit ={
 //     get grand children of barack obamas dad
-      val query1 = constructKnownPathQuery("Lolo_Soetoro", Seq("children", "children"))
-      println(query1)
-      val results1 = runQuery(query1)
-      println(results1.mkString("\n"))
+      time {
+        for (i <- 1 to 11) {
+          val query1 = constructKnownPathQuery("Bob_Dylan", Seq("children", "children"))
+          println(query1)
+          val results1 = runQuery(query1)
+          println(results1.mkString("\n"))
 
-////     2 hop relations between barack obama and his dad
-//        val query2 = constructAllPathsQuery(stringToDBPediaResource("Lolo_Soetoro"), stringToDBPediaResource("Barack_Obama"), maxHops = 3)
-//        println(query2)
-//        val results2 = runQuery(query2)
-//        println(results2.mkString(s"A\tB\t", s"\t1.0\nA\tB\t", "\t1.0"))
+          //     2 hop relations between barack obama and his dad
+          val query2 = constructAllPathsQuery(stringToDBPediaResource("Bob_Dylan"), stringToDBPediaResource("Barack_Obama"), maxHops = 1)
+          println(query2)
+          val results2 = runQuery(query2)
+          println(results2.mkString(s"A\tB\t", s"\t1.0\nA\tB\t", "\t1.0"))
 
-//    val query3 = dbPediaToFreebase("Amsterdam")
-//    println(query3)
-//    val results3 = runQuery(query3)
-//    println(results3.mkString("\n"))
+          val query3 = dbPediaToFreebase("Amsterdam")
+          println(query3)
+          val results3 = runQuery(query3)
+          println(results3.mkString("\n"))
+        }
+      }
+  }
+
+  def time[R](block: => R): R = {
+    val t0 = System.nanoTime()
+    val result = block    // call-by-name
+    val t1 = System.nanoTime()
+    println("Elapsed time: " + (t1 - t0)/1000000+ "ms")
+    result
   }
 }
