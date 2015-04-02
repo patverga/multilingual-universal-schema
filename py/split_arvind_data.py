@@ -4,7 +4,7 @@ import sys
 
 
 def main(argv):
-    if(len(argv) < 2):
+    if(len(argv) < 1):
         print ("must supply input file")
         sys.exit()
 
@@ -14,7 +14,7 @@ def main(argv):
     relation_set = set()
 
     # read lines into a map from mention pair -> lines containing that pair
-    for line in open(argv[1], 'r'):
+    for line in open(argv[0], 'r'):
         parts = line.split('\t')
         pair = parts[0]
         relation = parts[1]
@@ -33,3 +33,6 @@ def main(argv):
         for line in split:
             f.write(line)
         f.close()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
