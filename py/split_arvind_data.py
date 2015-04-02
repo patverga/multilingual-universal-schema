@@ -40,7 +40,7 @@ def main(argv):
 
     for (split, name) in zip(splits, out_names):
         shuffle(split)
-        f = open(name, 'w')
+        f = open(name, 'w', encoding="UTF-8")
         for line in split:
             f.write(line)
         f.close()
