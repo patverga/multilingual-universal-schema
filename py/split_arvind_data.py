@@ -29,7 +29,7 @@ def main(argv):
         # add negative samples
         if index > 0:
             for i in range(1, neg_samples):
-                splits[randint(1, 2)].append(pairs[randint(0, len(pairs) - 1)] + "\t" + relation + "\t0")
+                splits[randint(1, 2)].append(pairs[randint(0, len(pairs) - 1)] + "\t" + relation + "\t0\n")
 
         if pair not in pair_set:
             pair_set.add(pair)
