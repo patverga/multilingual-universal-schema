@@ -42,7 +42,7 @@ object TACPipelineTest {
       doc.annotators += classOf[TACDocumentType] -> classOf[TACDocumentType]
 
       TacAnnotator.compound.process(doc)
-      new ELDocument(serDoc.id, doc.sections(1).string, lang = lang)
+      ELDocument(serDoc.id, doc.sections(1).string, lang = lang)
     }).seq
 
     println("Mention Finding and Entity Linking...")
