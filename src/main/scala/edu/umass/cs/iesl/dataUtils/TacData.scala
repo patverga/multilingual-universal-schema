@@ -34,7 +34,8 @@ object TACPipelineTest {
     val tacFiles = new TacFileIterator(new File(opts.inputFileName.value))
 
     println("Processing files...")
-    val elDocs = tacFiles.map ( serDoc =>
+    val serDocs = tacFiles.toList
+    val elDocs = serDocs.par.map ( serDoc =>
     {
       val doc = new Document(serDoc.docString).setName(serDoc.id)
       doc.attr += TACDocumentType.fromFilePath(new File("newswire"))
@@ -42,7 +43,7 @@ object TACPipelineTest {
 
       TacAnnotator.compound.process(doc)
       new ELDocument(serDoc.id, doc.sections(1).string, lang = lang)
-    }).toSeq
+    }).seq
 
     println("Mention Finding and Entity Linking...")
     val mentionFinder = if (lang == Spanish) SpanishNERMentionFinder else EnglishNERMentionFinder
