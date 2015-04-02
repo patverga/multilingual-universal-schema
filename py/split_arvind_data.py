@@ -1,6 +1,7 @@
 __author__ = 'pat'
 from random import shuffle, randint
 import sys
+import codecs
 
 
 def main(argv):
@@ -40,9 +41,9 @@ def main(argv):
 
     for (split, name) in zip(splits, out_names):
         shuffle(split)
-        f = open(name, 'w', encoding="UTF-8")
+        f = codecs.open(name, 'w', encoding="UTF-8")
         for line in split:
-            f.write(line)
+            f.write(unicode(line, 'utf-8'))
         f.close()
 
 
