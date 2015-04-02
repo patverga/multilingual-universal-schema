@@ -31,7 +31,7 @@ object TACPipelineTest {
 
     val lang = DocLanguage.fromIsoString(opts.language.value)
 
-    val tacFiles = new TacFileIterator(new File("/Users/pat/data/spanish-gigaword/newswire/xin_spa_200503.gz"))
+    val tacFiles = new TacFileIterator(new File(opts.inputFileName.value))
 
     println("Processing files...")
     val elDocs = tacFiles.map ( serDoc =>
