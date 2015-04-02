@@ -36,6 +36,7 @@ class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
 
   def freebase2DBPedia(fId:String):Option[(String)] = f2db.get(fId)
 }
+
 object FreebaseWikiBiMap extends FreebaseWikiBiMap(
   new File("/iesl/canvas/beroth/tac/data/freebase_to_wiki_types.tsv"),
   new File("/home/pat/data/dbpedia/freebase_links.nt"))

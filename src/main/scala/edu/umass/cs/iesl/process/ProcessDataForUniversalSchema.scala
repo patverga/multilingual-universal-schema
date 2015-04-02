@@ -109,7 +109,11 @@ abstract class ProcessDataForUniversalSchema
 
   def batchProcess(opts: MultilingualUniversalSchemaOpts, mentionFinder: MultilingualNERMentionFinder,
                    entityLinker : EntityLinker): Unit = {
-    val elDocs = IO.loadPlainTextTestData(opts)
+    batchProcess(opts, mentionFinder, entityLinker, IO.loadPlainTextTestData(opts))
+  }
+
+  def batchProcess(opts: MultilingualUniversalSchemaOpts, mentionFinder: MultilingualNERMentionFinder,
+                   entityLinker : EntityLinker, elDocs: Seq[ELDocument]): Unit = {
     var i = 0
     while (i < elDocs.size) {
       // hack to deal with ner lexicon oading not being threadsafe bug
