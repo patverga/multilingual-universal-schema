@@ -124,7 +124,7 @@ abstract class ProcessDataForUniversalSchema
     var i = 0
     while (i < elDocs.size) {
       // hack to deal with ner lexicon oading not being threadsafe bug
-      val batch = if (i == 0) Seq(elDocs.head) else elDocs.slice(i, Math.min(i + batchSize, elDocs.size))
+      val batch = if (i < 5) Seq(elDocs(i)) else elDocs.slice(i, Math.min(i + batchSize, elDocs.size))
       val result = processELDocs(batch, mentionFinder, entityLinker, opts.threads.value.toInt > 1, arvindFormat = arvindFormat)
       println(result)
       if (opts.outputFileName.wasInvoked) {
@@ -160,7 +160,6 @@ abstract class ProcessDataForUniversalSchema
       {
         val e1 = Slug.unSlug(rm.arg1.entitySlug)
         val e2 = Slug.unSlug(rm.arg2.entitySlug)
-        println(e1, e2)
         val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
         val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
         val formatedRelation = if(arvindFormat) r.provenance.replaceAll(" ",",") else r.provenance
