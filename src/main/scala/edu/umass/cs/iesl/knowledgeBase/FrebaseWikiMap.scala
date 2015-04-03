@@ -10,6 +10,7 @@ import scala.io.Source
 
 class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
 
+  print("Loading knowledge base id maps... ")
   val s1 = Source.fromFile(f2wFile)
   val f2w = s1.getLines().map { line =>
     val Array(fId, wId, _) = line.split("\t")
@@ -27,6 +28,8 @@ class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
   s2.close()
 
   val db2f = f2db.map(_.swap)
+  println(" Done")
+
 
   def apply(fId:FreebaseId):Option[(WikipediaId)] = f2w.get(fId)
 
