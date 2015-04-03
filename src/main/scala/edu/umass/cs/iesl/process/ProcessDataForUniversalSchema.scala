@@ -160,6 +160,7 @@ abstract class ProcessDataForUniversalSchema
       {
         val e1 = Slug.unSlug(rm.arg1.entitySlug)
         val e2 = Slug.unSlug(rm.arg2.entitySlug)
+        println(e1, e2)
         val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
         val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
         val formatedRelation = if(arvindFormat) r.provenance.replaceAll(" ",",") else r.provenance

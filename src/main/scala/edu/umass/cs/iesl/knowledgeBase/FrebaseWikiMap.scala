@@ -13,6 +13,7 @@ class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
   print("Loading knowledge base id maps... ")
   val s1 = Source.fromFile(f2wFile)
   val f2w = s1.getLines().map { line =>
+    println(line)
     val Array(fId, wId) = line.split("\t")
     (FreebaseId(fId), WikipediaId(wId))
   }.toMap
