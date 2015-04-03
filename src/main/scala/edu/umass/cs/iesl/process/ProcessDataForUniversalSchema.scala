@@ -117,7 +117,7 @@ abstract class ProcessDataForUniversalSchema
     var i = 0
     while (i < elDocs.size) {
       // hack to deal with ner lexicon oading not being threadsafe bug
-      val batch = if (i == 0) Seq(elDocs(0)) else elDocs.slice(i, Math.min(i + batchSize, elDocs.size))
+      val batch = if (i == 0) Seq(elDocs.head) else elDocs.slice(i, Math.min(i + batchSize, elDocs.size))
       val result = processELDocs(batch, mentionFinder, entityLinker, opts.threads.value.toInt > 1)
       println(result)
       if (opts.outputFileName.wasInvoked) {
