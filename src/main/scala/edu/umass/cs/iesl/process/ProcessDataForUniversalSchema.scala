@@ -1,6 +1,11 @@
 package edu.umass.cs.iesl.process
 
-import cc.factorie.app.nlp.Document
+import java.io.File
+
+import cc.factorie.app.nlp.load.TACDocTypes.TACDocumentType
+import cc.factorie.app.nlp.{CompoundDocumentAnnotator, Document}
+import cc.factorie.app.nlp.load.{TacFileIterator, TACSectionalizer}
+import cc.factorie.app.nlp.segment.DeterministicNormalizingHtmlTokenizer
 import cc.factorie.la.DenseTensor1
 import edu.umass.cs.iesl.dataUtils.IO
 import edu.umass.cs.iesl.entity_embeddings.EntityEmbeddingOpts
@@ -14,8 +19,10 @@ import edu.umass.cs.iesl.knowledgeBase.{FreebaseWikiBiMap, WikipediaId}
  * Created by pv on 3/5/15.
  */
 
-
-object EmbeddingEntityLinkedProcesser extends ProcessDataForUniversalSchema
+/**
+ * Process raw text using Embeddings Entity Linker
+ */
+object EmbeddingLinkedRawTextProcesser extends ProcessDataForUniversalSchema
 {
   def main(args : Array[String]) {
     val opts = new MultilingualUniversalSchemaOpts
@@ -27,8 +34,8 @@ object EmbeddingEntityLinkedProcesser extends ProcessDataForUniversalSchema
     batchProcess(opts, mentionFinder, linker)
   }
 
-  def initializeLinker(opts : MultilingualUniversalSchemaOpts): LogisticRegressionTrainedLinker ={
-
+  def initializeLinker(opts : MultilingualUniversalSchemaOpts): LogisticRegressionTrainedLinker =
+  {
     // Load the typeDB
     val typeDB = TypeDB.fromCMDOptions(opts)
     println("Loading Embeddings")
@@ -44,35 +51,12 @@ object EmbeddingEntityLinkedProcesser extends ProcessDataForUniversalSchema
     new LogisticRegressionTrainedLinker(features, embeddingCollection, surfaceFormDB,
       typeDB, null, contextWindowSize, opts.caseSensitiveWords.value, opts.caseSensitiveMentions.value, weights = weights)
   }
-  
-  def formatRelationsForExport(doc: Document): String = {
-    val sb = new StringBuilder
-    val relationMentionList = doc.attr[EntityLinkedRelationMentionList]
-    relationMentionList.foreach(rm => {
-      rm._relations.foreach(r => {
-        val e1 = Slug.unSlug(rm.arg1.entitySlug)
-        val e2 = Slug.unSlug(rm.arg2.entitySlug)
-        val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
-        val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
-        if (fbid1 != None && fbid2 != None) {
-          sb.append(s"$e1\t${fbid1.get.value}\t") // id1 nertag
-          sb.append(s"$e2\t${fbid2.get.value}\t") // id2 nertag
-          sb.append(s"${r.provenance}\t") // evidence
-          sb.append("1.0\n")
-          //          sb.append("\n")
-        } else {
-          if (fbid1 == None) print(s"Could not link $e1.\t")
-          if (fbid2 == None) print(s"Could not link $e2.")
-          println()
-        }
-      })
-    })
-    sb.toString()
-  }
-  
 }
 
-object ExactStringFreebaseLinkedProcesser extends ProcessDataForUniversalSchema
+/**
+ * Process raw text using exact string match linking to freebase
+ */
+object ExactStringLinkedRawTextProcesser extends ProcessDataForUniversalSchema
 {
   def main(args : Array[String]) {
     val opts = new MultilingualUniversalSchemaOpts
@@ -81,28 +65,49 @@ object ExactStringFreebaseLinkedProcesser extends ProcessDataForUniversalSchema
     val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
     batchProcess(opts, mentionFinder, ExactStringFreebaseLink)
   }
-
-  def formatRelationsForExport(doc: Document): String = {
-    val sb = new StringBuilder
-    val relationMentionList = doc.attr[EntityLinkedRelationMentionList]
-    relationMentionList.foreach(rm => {
-      rm._relations.foreach(r => {
-        val e1 = rm.arg1.entitySlug
-        val e2 = rm.arg2.entitySlug
-        if (e1 != "" && e2 != "") {
-          sb.append(s"$e1\t") // id1 nertag
-          sb.append(s"$e2\t") // id2 nertag
-          sb.append(s"${r.provenance}\t") // evidence
-          sb.append("1.0\n")
-          //          sb.append("\n")
-        }
-      })
-    })
-    sb.toString()
-  }
-  
 }
 
+/**
+ * Process TAC formated SGML docs using exact string match linking to freebase
+ */
+object ExactStringLinkedTACProcessor extends ProcessDataForUniversalSchema
+{
+
+  val annos = Seq(
+    DeterministicNormalizingHtmlTokenizer,   // tokenize, normalize
+    TACSectionalizer                       // remove sgml
+  )
+  val compound = new CompoundDocumentAnnotator(annos)
+
+  def main(args:Array[String]) {
+    val opts = new MultilingualUniversalSchemaOpts
+    opts parse args
+
+    val lang = DocLanguage.fromIsoString(opts.language.value)
+
+    val tacFiles = new TacFileIterator(new File(opts.inputFileName.value))
+
+    println("Processing files...")
+    val elDocs = tacFiles.map ( serDoc =>
+    {
+      val doc = new Document(serDoc.docString).setName(serDoc.id)
+      doc.attr += TACDocumentType.fromFilePath(new File("newswire"))
+      doc.annotators += classOf[TACDocumentType] -> classOf[TACDocumentType]
+
+      compound.process(doc)
+      ELDocument(serDoc.id, doc.sections(1).string, lang = lang)
+    }).toSeq
+
+    println("Mention Finding and Entity Linking...")
+    val mentionFinder = if (lang == Spanish) SpanishNERMentionFinder else EnglishNERMentionFinder
+    batchProcess(opts, mentionFinder, ExactStringFreebaseLink, elDocs)
+  }
+}
+
+
+/**
+ * super class handling the processing and exporting of data
+ */
 abstract class ProcessDataForUniversalSchema
 {
   val batchSize = 256
@@ -113,12 +118,14 @@ abstract class ProcessDataForUniversalSchema
   }
 
   def batchProcess(opts: MultilingualUniversalSchemaOpts, mentionFinder: MultilingualNERMentionFinder,
-                   entityLinker : EntityLinker, elDocs: Seq[ELDocument]): Unit = {
+                   entityLinker : EntityLinker, elDocs: Seq[ELDocument]): Unit =
+  {
+    val arvindFormat = opts.format.value == "arvind"
     var i = 0
     while (i < elDocs.size) {
       // hack to deal with ner lexicon oading not being threadsafe bug
       val batch = if (i == 0) Seq(elDocs.head) else elDocs.slice(i, Math.min(i + batchSize, elDocs.size))
-      val result = processELDocs(batch, mentionFinder, entityLinker, opts.threads.value.toInt > 1)
+      val result = processELDocs(batch, mentionFinder, entityLinker, opts.threads.value.toInt > 1, arvindFormat = arvindFormat)
       println(result)
       if (opts.outputFileName.wasInvoked) {
         IO.exportStringToFile(opts.outputFileName.value, result, append = true)
@@ -128,7 +135,7 @@ abstract class ProcessDataForUniversalSchema
   }
 
   def processELDocs(elDocs : Seq[ELDocument], mentionFinder: MultilingualNERMentionFinder,
-                    linker : EntityLinker, parallel : Boolean = true): String = {
+                    linker : EntityLinker, parallel : Boolean = true, arvindFormat : Boolean = false): String = {
     // load data and process each doc in parallel
     val docs = if (parallel) elDocs.par else elDocs
     docs.zipWithIndex.map { case (elDoc, i) =>
@@ -140,11 +147,40 @@ abstract class ProcessDataForUniversalSchema
       linker.process(fDoc)
       EntityLinkedLogPatternsRelations.process(fDoc)
 
-      formatRelationsForExport(fDoc)
+      formatRelationsForExport(fDoc, arvindFormat)
     }.mkString("")
   }
-  def formatRelationsForExport(doc: Document): String
 
+  def formatRelationsForExport(doc: Document, arvindFormat : Boolean = false): String = {
+    val sb = new StringBuilder
+    val entitySeparator = if (arvindFormat) "," else "\t"
+    val relationMentionList = doc.attr[EntityLinkedRelationMentionList]
+    relationMentionList.foreach(rm => {
+      rm._relations.foreach(r =>
+      {
+        val e1 = Slug.unSlug(rm.arg1.entitySlug)
+        val e2 = Slug.unSlug(rm.arg2.entitySlug)
+        val fbid1 = FreebaseWikiBiMap(WikipediaId(e1))
+        val fbid2 = FreebaseWikiBiMap(WikipediaId(e2))
+        val formatedRelation = if(arvindFormat) r.provenance.replaceAll(" ",",") else r.provenance
+
+        if (fbid1 != None && fbid2 != None) {
+//          sb.append(s"$e1$entitySeparator")
+          sb.append(s"${fbid1.get.value}$entitySeparator") // id1 nertag
+//          sb.append(s"$e2$entitySeparator")
+          sb.append(s"${fbid2.get.value}\t") // id2 nertag
+          sb.append(s"$formatedRelation\t") // evidence
+          sb.append("1.0\n")
+          //          sb.append("\n")
+        } else {
+          if (fbid1 == None) print(s"Could not link $e1.\t")
+          if (fbid2 == None) print(s"Could not link $e2.")
+          println()
+        }
+      })
+    })
+    sb.toString()
+  }
 }
 
 
@@ -153,4 +189,5 @@ class MultilingualUniversalSchemaOpts extends EntityEmbeddingOpts{
   val inputDirName = new CmdOption[String]("input-directory", "", "DIRNAME", "A directory containing different text files.")
   val outputFileName = new CmdOption[String]("output-filename", "", "FILENAME", "File to output results to.")
   val threads = new CmdOption[String]("threads", "24", "INT", "Number of threads to use.")
+  val format = new CmdOption[String]("format", "tac", "STRING", "Format as factorie tac format or arvind format.")
 }

@@ -38,7 +38,7 @@ class FreebaseWikiBiMap(f2wFile:File, f2dbFile:File) {
 }
 
 object FreebaseWikiBiMap extends FreebaseWikiBiMap(
-  new File("/iesl/canvas/beroth/tac/data/freebase_to_wiki_types.tsv"),
+  new File("/home/pat/data/freebase/english_freebase_names"),
   new File("/home/pat/data/dbpedia/freebase_links.nt"))
 
 

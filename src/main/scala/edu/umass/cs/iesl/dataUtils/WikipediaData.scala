@@ -27,7 +27,7 @@ object WikipediaProcessor extends App
   val mentionFinder = if (opts.language.value == "es") SpanishNERMentionFinder else EnglishNERMentionFinder
 
   val batchSize = 2000
-  val linker = EmbeddingEntityLinkedProcesser.initializeLinker(opts)
+  val linker = EmbeddingLinkedRawTextProcesser.initializeLinker(opts)
   println(s"Processing wiki data at ${opts.inputFileName.value}")
   var batch = new ArrayBuffer[(Int, ELDocument)]
   var i = 0
@@ -46,7 +46,7 @@ object WikipediaProcessor extends App
         mentionFinder.process(fDoc)
         linker.process(fDoc)
         EntityLinkedLogPatternsRelations.process(fDoc)
-        val result = EmbeddingEntityLinkedProcesser.formatRelationsForExport(fDoc)
+        val result = EmbeddingLinkedRawTextProcesser.formatRelationsForExport(fDoc, opts.format.value == "arvind")
         IO.exportStringToFile(s"processed_wikis/${opts.language.value}/${j}_${elDoc.title}", result, append = true)
       }
       batch = new ArrayBuffer[(Int, ELDocument)]
