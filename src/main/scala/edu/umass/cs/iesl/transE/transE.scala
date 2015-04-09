@@ -5,231 +5,232 @@ import java.util
 import java.util.zip.GZIPInputStream
 
 import cc.factorie.app.nlp.embeddings._
-import cc.factorie.la.{DenseTensor1, WeightsMapAccumulator}
-import cc.factorie.optimize.{AdaGradRDA, Example}
-import cc.factorie.util.{Threading, DoubleAccumulator}
-import cc.factorie.model.{ Parameters, Weights }
+import cc.factorie.la.{Tensor, DenseTensor1, WeightsMapAccumulator}
+import cc.factorie.optimize._
+import cc.factorie.util.{CmdOptions, Threading, DoubleAccumulator}
+import cc.factorie.model.{Parameters, Weights}
 
 import scala.collection.mutable
 import scala.collection.mutable.{PriorityQueue, ArrayBuffer}
+import scala.util.Random
 
 /**
  * Created by pat on 4/3/15.
  */
-class TransE(val opts: EmbeddingOpts) extends Parameters{
+class TransE(val opts: TransEOpts) extends Parameters {
 
-  // Algo related
-  val D = 50 //opts.dimension.value
-  // default value is 200
-  var V: Int = 0
-  // vocab size. Will computed in buildVocab() section
-  protected val threads = opts.threads.value
-  //  default value is 12
-  protected val adaGradDelta = 0.01 //opts.delta.value
-  // default value is 0.1
-  protected val adaGradRate = opts.rate.value
-  //  default value is 0.025
-  protected val minCount = opts.minCount.value
-  // default value is 5
-  protected val ignoreStopWords = if (opts.ignoreStopWords.value) 1 else 0
-  // default value is 0
-  protected val vocabHashSize = opts.vocabHashSize.value
-  // default value is 20 M. load factor is 0.7. So, Vocab size = 0.7 * 20M = 14M vocab supported which is sufficient enough for large amounts of data
-  protected val samplingTableSize = opts.samplingTableSize.value
-  // default value is 100 M
-  protected val maxVocabSize = opts.vocabSize.value
-
+  val D = 50
+  var weights: Seq[Weights] = null
   val gamma = 1
-  val minRelationCount = 1 //10
-  val negativeSamples = 1
-  val iterations = 1
 
-  // IO Related
-  // corpus input filename. Code takes cares of .gz extension
-  protected val outputFilename = opts.output.value
-  // embeddings output filename
-  private val storeInBinary = if (opts.binary.value) 1 else 0
-  // binary=1 will make both vocab file (optional) and embeddings in .gz file
-  private val loadVocabFilename = opts.loadVocabFile.value
-  // load the vocab file. Very useful for large corpus should you run multiple times
-  private val saveVocabFilename = opts.saveVocabFile.value
-  // save the vocab into a file. Next time for the same corpus, load it . Saves lot of time on large corpus
-  private val encoding = opts.encoding.value
-  // Default is UTF8
-  // data structures
-  protected var trainer: LiteHogwildTrainer = null
-  // modified version of factorie's hogwild trainer for speed by removing logging and other unimportant things. Expose processExample() instead of processExamples()
-  protected var optimizer: AdaGradRDA = null
+  protected val threads = 1
+  protected val adaGradDelta = 0
+  protected val adaGradRate = 0.01
+  protected val encoding = "UTF-8"
 
-  var relationWeights: Seq[Weights] = null
-  var entityWeights: Seq[Weights] = null
-  // EMBEDDINGS . Will be initialized in learnEmbeddings() after buildVocab() is called first
+  protected val minRelationCount = 1
+  protected val negativeSamples = 1
+  protected val iterations = 10000
+  protected val miniBatchSize = 1000
+
+  protected var trainer: Trainer = null
+  protected var optimizer: GradientOptimizer = null
+
+  protected val relationVocab = new util.HashMap[String, Int]
+  protected val entityVocab = new util.HashMap[String, Int]
+  var relationCount = 0
+  var entityCount = 0
+
+  val rand = new Random(69)
 
 
-//  val relationSet = mutable.HashSet[String]()
-  val relationVocab = new VocabBuilder()
-//  val entitySet = mutable.HashSet[String]()
-  val entityVocab = new VocabBuilder()
-
-
-
-  // assumes arvind format : [e1,e2\trelation\tscore]
-  def buildVocab(inFile : String): Seq[(String, String, String)] =
-  {
+  def buildVocab(inFile: String): Seq[(String, String, String)] = {
     println("Building Vocab")
-    val corpusLineItr = inFile.endsWith(".gz") match
-    {
+    val corpusLineItr = inFile.endsWith(".gz") match {
       case true => io.Source.fromInputStream(new GZIPInputStream(new FileInputStream(inFile)), encoding).getLines()
       case false => io.Source.fromInputStream(new FileInputStream(inFile), encoding).getLines()
     }
     val relationMap = new mutable.HashMap[String, ArrayBuffer[(String, String, String)]]
     while (corpusLineItr.hasNext) {
       val line = corpusLineItr.next()
-//      val (e1, relation, e2) = parseArvind(line)
+      //      val (e1, relation, e2) = parseArvind(line)
       val (e1, relation, e2) = parseTsv(line)
-      relationVocab.addWordToVocab(relation)
-      entityVocab.addWordToVocab(e1)
-      entityVocab.addWordToVocab(e2)
+      if (!entityVocab.containsKey(e1)) {
+        entityVocab.put(e1, entityCount)
+        entityCount += 1
+      }
+      if (!entityVocab.containsKey(e2)) {
+        entityVocab.put(e2, entityCount)
+        entityCount += 1
+      }
+      if (!relationVocab.containsKey(relation)) {
+        relationVocab.put(relation, relationCount)
+        relationCount += 1
+      }
       relationMap.put(relation, relationMap.getOrElse(relation, new ArrayBuffer()) += ((e1, relation, e2)))
     }
-    entityVocab.buildSamplingTable() // for getting random word from vocab in O(1) otherwise would O(log |V|)
     // flatten input triplets
     relationMap.filter(eList => eList._2.size >= minRelationCount).toSeq.flatMap(eList => eList._2.toSet.toSeq)
   }
 
-  def parseArvind(line: String): (String, String, String) ={
+  // assumes arvind format : [e1,e2\trelation\tscore]
+  def parseArvind(line: String): (String, String, String) = {
     val Array(entities, relation, score) = line.split("\t")
     val Array(e1, e2) = entities.split(",")
     (e1, relation, e2)
   }
 
-  def parseTsv(line: String): (String, String, String) ={
+  def parseTsv(line: String): (String, String, String) = {
     val parts = line.split("\t")
     (parts(0), parts(1), parts(2))
   }
 
   // Component-2
-  def learnEmbeddings(relationList : Seq[(String, String, String)]): Unit = {
+  def learnEmbeddings(relationList: Seq[(String, String, String)]): Unit = {
     println("Learning Embeddings")
-    optimizer = new AdaGradRDA(delta = adaGradDelta, rate = adaGradRate)
-    entityWeights = (0 until entityVocab.size()).map(i => Weights(TensorUtils.setToRandom1(new DenseTensor1(D, 0)))) // initialized using wordvec random
-    relationWeights = (0 until relationVocab.size()).map(i => Weights(TensorUtils.setToRandom1(new DenseTensor1(D, 0)))) // initialized using wordvec random
+
+//    optimizer = new AdaGradRDA(delta = adaGradDelta, rate = adaGradRate)
+    optimizer = new AdaGrad(delta = adaGradDelta, rate = adaGradRate)
+    trainer = new HogwildTrainer(weightsSet = this.parameters, optimizer = optimizer, nThreads = threads, maxIterations = Int.MaxValue)
+//    trainer = new OnlineTrainer(weightsSet = this.parameters, optimizer = optimizer, maxIterations = Int.MaxValue)
+
+//    weights = (0 until entityCount + relationCount).map(i => Weights(TensorUtils.setToRandom1(new DenseTensor1(D, 0)))) // initialized using wordvec random
+    //TODO make sure this works
+    weights = Seq.fill(entityCount + relationCount)(Weights(TensorUtils.setToRandom1(new DenseTensor1(D, 0)))) // initialized using wordvec random
     optimizer.initializeWeights(this.parameters)
-    trainer = new LiteHogwildTrainer(weightsSet = this.parameters, optimizer = optimizer, nThreads = threads, maxIterations = Int.MaxValue)
-    val threadIds = (0 until threads).map(i => i)
-    val sliceSize = relationList.size / threads
-    for (iteration <- 0 to iterations)
-      Threading.parForeach(threadIds, threads)(threadId => workerThread(threadId, relationList.slice(threadId*sliceSize, (1+threadId)*sliceSize)))
+
+    // normalize relation embeddings once
+    //TODO check bounds
+    (entityCount until relationCount + entityCount).par.foreach(weights(_).value.twoNormalize())
+    println(weights.size, entityCount, entityVocab.size(), relationCount, relationVocab.size())
+
+    for (iteration <- 0 to iterations) {
+      println(s"Training iteration: $iteration")
+      // sample miniBatch
+      val miniBatch = Seq.fill(miniBatchSize)(relationList(rand.nextInt(relationList.size)))
+      // normalize entity embeddings
+      // TODO check bounds
+//      for (i <- 0 to entityCount -1) weights(i).value.twoNormalize()
+      (0 until entityCount).par.foreach(weights(_).value.twoNormalize())
+
+      processMiniBatch(miniBatch)
+    }
     println("Done learning embeddings. ")
     //store()
   }
 
-  def rankLearnedEmbeddings(relationList : Seq[(String, String, String)]): Unit =
-  {
+  def evaluate(relationList: Seq[(String, String, String)]): Unit = {
     val headRanks = new ArrayBuffer[Int]
     val tailRanks = new ArrayBuffer[Int]
-    var triplet = 0
+    var tripletIndex = 0
     // rank each triplet in the set
-    while (triplet < relationList.size){
-      val (e1, relation, e2) = relationList(triplet)
-      var negative = 0
-      val e1Id = entityVocab.getId(e1)
-      val e2Id = entityVocab.getId(e2)
-      val e1Emb = entityWeights(e1Id).value
-      val e2Emb = entityWeights(e2Id).value
-      val relEmb = relationWeights(relationVocab.getId(relation)).value
+    while (tripletIndex < relationList.size) {
+      val (e1, relation, e2) = relationList(tripletIndex)
+      val e1Id = entityVocab.get(e1)
+      val e2Id = entityVocab.get(e2)
+      val e1Emb = weights(e1Id).value
+      val e2Emb = weights(e2Id).value
+      val relEmb = weights(relationVocab.get(relation) + entityCount).value
 
       var headRank = 0
       var tailRank = 0
-      val score = tripletScore(e1Emb, relEmb, e2Emb)
-      while (negative < entityVocab.size())
-      {
-        val negEmb = entityWeights(negative).value
+      val score = (e1Emb + relEmb - e2Emb).twoNorm
+
+      var negativeId = 0
+      while (negativeId < entityVocab.size()) {
+        val negEmb = weights(negativeId).value
         // dont self rank
-        if (negative != e2Id && tripletScore(e1Emb, relEmb, negEmb) < score)
+        if(negativeId != e2Id && negativeId != e2Id) {
+          val negHeadScore = (e1Emb + relEmb - negEmb).twoNorm
+          if (negHeadScore < score)
             headRank += 1
-
-        if (negative != e1Id && tripletScore(negEmb, relEmb, e2Emb) < score)
+          val negTailScore = (negEmb + relEmb - e2Emb).twoNorm
+          if (negTailScore < score)
             tailRank += 1
-
-        negative += 1
+        }
+        negativeId += 1
       }
-      println(tailRank, headRank)
+      if (tripletIndex % 1000 == 0) println(tripletIndex.toDouble/relationList.size.toDouble, tailRank, headRank)
       tailRanks += tailRank
       headRanks += headRank
-      triplet += 1
+      tripletIndex += 1
     }
+    val ranks = tailRanks ++ headRanks
+    println(ranks.count(_ <= 10).toDouble / (relationList.size * 2).toDouble, ranks.sum / ranks.length)
   }
 
-  def tripletScore(e1 : Weights#Value, rel :Weights#Value, e2: Weights#Value): Double ={
-    1.0 - (e1 + rel).l2Similarity(e2)
-  }
 
-  def process(e1: String, relation : String, e2 : String): Int =
-  {
-    val e1Index = entityVocab.getId(e1)
-    val e2Index = entityVocab.getId(e2)
-    val relationIndex = relationVocab.getId(relation)
-    // make the examples
-    trainer.processExample(new TansEExample(this, e1Index, relationIndex, e2Index, entityVocab.getRandWordId(), true))
-    trainer.processExample(new TansEExample(this, e1Index, relationIndex, e2Index, entityVocab.getRandWordId(), false))
-    1
-  }
-
-  protected def workerThread(id: Int, relationList : Seq[(String, String, String)], printAfterNDoc: Long = 100): Unit = {
-    var word_count: Long = 0
-    var i = 0
-    while (i < relationList.size) {
-      val (e1, relation, e2) = relationList(i)
-      word_count += process(e1, relation, e2) // Design choice : should word count be computed here and just expose process(doc : String): Unit ?.
-//      if (id == 1 && i % printAfterNDoc == 0) { // print the process after processing 100 docs in 1st thread. It approx reflects the total progress
-//        println("Progress : " + word_count / relationList.size.toDouble * 100 + " %")
-//      }
-      i += 1
+  protected def processMiniBatch(relationList: Seq[(String, String, String)]): Unit = {
+    val examples = relationList.map{case (e1, relation, e2) =>
+      val e1Index = entityVocab.get(e1)
+      val e2Index = entityVocab.get(e2)
+      val relationIndex = relationVocab.get(relation) + entityCount
+      // corrupt either head or tail
+      if (rand.nextInt(2) == 0) new TansEExample(this, e1Index, relationIndex, e2Index, rand.nextInt(entityCount), e2Index)
+      else new TansEExample(this, e1Index, relationIndex, e2Index, e1Index, rand.nextInt(entityCount))
     }
+     trainer.processExamples(examples)
   }
 }
 
 object TestTransE extends App {
 
-  val transE = new TransE(new EmbeddingOpts)
-  val train = transE.buildVocab("/Users/pat/universal-schema/transe/Relation_Extraction/data/nips13-dataset/Freebase/train.txt")
-  val test = transE.buildVocab("/Users/pat/universal-schema/transe/Relation_Extraction/data/nips13-dataset/Freebase/test.txt")
+  val opts = new TransEOpts()
+  opts.parse(args)
+
+  val transE = new TransE(opts)
+//  val train = transE.buildVocab("/Users/pat/universal-schema/transe/SME/data/FB15k/freebase_mtr100_mte100-train.txt")
+//  val test = transE.buildVocab("/Users/pat/universal-schema/transe/SME/data/FB15k/freebase_mtr100_mte100-test.txt")
+  val train = transE.buildVocab(opts.train.value)
+  val test = transE.buildVocab(opts.test.value)
   println(train.size, test.size)
   transE.learnEmbeddings(train)
-  transE.rankLearnedEmbeddings(test)
+  transE.evaluate(test)
 
 }
 
+class TransEOpts extends CmdOptions{
+  val train = new CmdOption[String]("train", "", "FILENAME", "Train file.")
+  val test = new CmdOption[String]("test", "", "FILENAME", "Test File.")
+  val outputFileName = new CmdOption[String]("output-filename", "", "FILENAME", "Output")
+}
 
-class TansEExample(model: TransE, e1 : Int, relation : Int, e2 : Int, corruptIndex :Int, corruptTail: Boolean) extends Example {
 
-  // to understand the gradient and objective refer to : http://arxiv.org/pdf/1310.4546.pdf
+class TansEExample(model: TransE, e1PosDex: Int, relDex: Int, e2PosDex: Int, e1NegDex: Int, e2NegDex: Int, l1: Boolean = false) extends Example {
+
   def accumulateValueAndGradient(value: DoubleAccumulator, gradient: WeightsMapAccumulator): Unit =
   {
-    val e1Embedding = model.entityWeights(e1).value
-    val e2Embedding = model.entityWeights(e2).value
-    val relationEmbedding = model.relationWeights(relation).value
-    val corruptEmbedding = model.entityWeights(corruptIndex).value
+    val e1PosEmb = model.weights(e1PosDex).value
+    val e1NegEmb = model.weights(e1NegDex).value
 
-    // d(e1 + relation, e2)
-    val posScore = model.tripletScore(e1Embedding, relationEmbedding, e2Embedding)
-    // d(e1 + relation, corrupt) or d(corrupt + relation, e2)
-    val negScore = if (corruptTail) model.tripletScore(e1Embedding, relationEmbedding, corruptEmbedding)
-      else model.tripletScore(corruptEmbedding, relationEmbedding, e2Embedding)
+    val e2PosEmb = model.weights(e2PosDex).value
+    val e2NegEmb = model.weights(e2NegDex).value
+
+    val relEmb = model.weights(relDex).value
+
+    var posGrad = e2PosEmb - e1PosEmb - relEmb
+    var negGrad = e2NegEmb - e1NegEmb - relEmb
+//    posGrad = if (l1 && posGrad > 0) 1 else if (l1 && posGrad <= 0) -1 else posGrad
+
     // gamma + pos - neg
-    val objective = model.gamma + posScore - negScore
-//    println(objective)
+    val objective = if (l1) model.gamma + posGrad.oneNorm - negGrad.oneNorm
+    else model.gamma + posGrad.twoNorm - negGrad.twoNorm
+
     val factor: Double = 1.0
 
     if (value ne null) value.accumulate(objective)
-    if (gradient ne null) {
 
-      if (!corruptTail)gradient.accumulate(model.entityWeights(e1), e1Embedding, factor)
-      else gradient.accumulate(model.entityWeights(e2), e2Embedding, factor)
-      gradient.accumulate(model.relationWeights(relation), relationEmbedding, factor)
-      gradient.accumulate(model.entityWeights(corruptIndex), corruptEmbedding, -factor)
+    // hinge loss
+    if (gradient != null && objective > 0.0)
+    {
+      gradient.accumulate(model.weights(e1PosDex), posGrad, factor)
+      gradient.accumulate(model.weights(e2PosDex), posGrad, -factor)
+      gradient.accumulate(model.weights(relDex), posGrad, factor)
+      gradient.accumulate(model.weights(e1NegDex), negGrad, -factor)
+      gradient.accumulate(model.weights(e2NegDex), negGrad, factor)
+      gradient.accumulate(model.weights(relDex), negGrad, -factor)
+//      gradient.accumulate(model.weights(relDex), e1PosEmb+e2NegEmb-e2PosEmb-e1NegEmb, factor)
+
     }
-
   }
 }
