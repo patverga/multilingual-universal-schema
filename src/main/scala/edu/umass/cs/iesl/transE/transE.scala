@@ -95,7 +95,7 @@ class TransE(val opts: TransEOpts) extends Parameters {
     //    optimizer = new AdaGradRDA(delta = adaGradDelta, rate = adaGradRate)
     optimizer = new AdaGrad(delta = adaGradDelta, rate = adaGradRate)
 //    trainer = new HogwildTrainer(weightsSet = this.parameters, optimizer = optimizer, nThreads = threads, maxIterations = Int.MaxValue)
-    trainer = new OnlineTrainer(weightsSet = this.parameters, optimizer = optimizer, maxIterations = Int.MaxValue, logEveryN = batchSize)
+    trainer = new OnlineTrainer(weightsSet = this.parameters, optimizer = optimizer, maxIterations = Int.MaxValue, logEveryN = batchSize-1)
 
     weights = (0 until entityCount + relationCount).map(i => Weights(TensorUtils.setToRandom1(new DenseTensor1(D, 0)))) // initialized using wordvec random
     optimizer.initializeWeights(this.parameters)
